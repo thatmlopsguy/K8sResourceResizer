@@ -20,6 +20,7 @@ pre-commit-run: ## Run pre-commit hooks
 
 pre-commit-install: ## Install pre-commit hooks
 	@uv run prek install
+	@uv run prek install --hook-type commit-msg
 
 pre-commit-update: ## Update pre-commit hooks
 	@uv run prek autoupdate
