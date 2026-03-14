@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 
 ARG TARGETPLATFORM=linux/amd64
-FROM --platform=$TARGETPLATFORM python:3.13-slim AS builder
+ARG PYTHON_VERSION=3.13-slim
+FROM --platform=$TARGETPLATFORM python:$PYTHON_VERSION AS builder
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -32,7 +33,7 @@ RUN apt upgrade -y  \
 # Copy project files
 WORKDIR /app
 COPY pyproject.toml ./
-COPY K8sResourceResizer/Src ./Src/
+COPY src ./src/
 
 # Upgrade pip and install Cython first
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \

@@ -1,0 +1,134 @@
+name: Resource Analyzer
+
+on:
+  workflow_dispatch:
+    inputs:
+      strategy:
+        description: "Resource recommendation strategy"
+        type: choice
+        options:
+          - basic
+          - time_aware
+          - trend_aware
+          - workload_aware
+          - quantile_regression
+          - moving_average
+          - prophet
+          - ensemble
+        default: "ensemble"
+        required: true
+      history_window:
+        description: "Historical data window (e.g., 24h, 7d, 8w, 1yr)"
+        type: string
+        default: "24h"
+        required: true
+      cpu_percentile:
+        description: "CPU percentile for recommendations"
+        type: number
+        default: 95.0
+        required: true
+      memory_buffer:
+        description: "Memory buffer multiplier (e.g., 1.15 for 15% buffer)"
+        type: number
+        default: 1.15
+        required: true
+      business_hours_start:
+        description: "Business hours start (0-23)"
+        type: number
+        default: 9
+        required: false
+      business_hours_end:
+        description: "Business hours end (0-23)"
+        type: number
+        default: 17
+        required: false
+      business_days:
+        description: "Business days (comma-separated, 0=Monday, 6=Sunday)"
+        type: string
+        default: "0,1,2,3,4"
+        required: false
+      trend_threshold:
+        description: "Trend threshold"
+        type: number
+        default: 0.1
+        required: false
+      high_variance_threshold:
+        description: "High variance threshold"
+        type: number
+        default: 0.5
+        required: false
+  schedule:
+    - cron: "0 0 * * *" # Runs daily at midnight UTC
+
+jobs:
+  analyze-resources:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to AWS ECR Public
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Sts GetCallerIdentity
+        run: |
+          aws sts get-caller-identity
+
+      - name: Run resource analyzer
+        env:
+          BUSINESS_HOURS_START: ${{ github.event.inputs.business_hours_start || 9 }}
+          BUSINESS_HOURS_END: ${{ github.event.inputs.business_hours_end || 17 }}
+          BUSINESS_DAYS: ${{ github.event.inputs.business_days || '0,1,2,3,4' }}
+          TREND_THRESHOLD: ${{ github.event.inputs.trend_threshold || 0.1 }}
+          HIGH_VARIANCE_THRESHOLD: ${{ github.event.inputs.high_variance_threshold || 0.5 }}
+          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+          GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
+          GITHUB_USERNAME: ${{ github.repository_owner }}
+        run: |
+          # Create base temp directory
+          TEMP_BASE=$(mktemp -d)
+          mkdir -p ${TEMP_BASE}/TEMP
+          echo "TEMP_BASE=${TEMP_BASE}" >> $GITHUB_ENV
+
+          docker run --rm \
+            --network=host \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v ${{ github.workspace }}:/app/manifests \
+            -v ${TEMP_BASE}:${TEMP_BASE} \
+            -v ~/.aws:/root/.aws \
+            -e AWS_REGION \
+            -e AWS_DEFAULT_REGION \
+            -e AWS_ACCESS_KEY_ID \
+            -e AWS_SECRET_ACCESS_KEY \
+            -e AWS_SESSION_TOKEN \
+            -e AWS_SECURITY_TOKEN \
+            -e AWS_ROLE_ARN \
+            -e AWS_WEB_IDENTITY_TOKEN_FILE \
+            -e AMP_WORKSPACE_ID=${{ secrets.AMP_WORKSPACE_ID }} \
+            -e CLUSTER_NAME=${{ secrets.CLUSTER_NAME }} \
+            -e BUSINESS_HOURS_START=${BUSINESS_HOURS_START} \
+            -e BUSINESS_HOURS_END=${BUSINESS_HOURS_END} \
+            -e BUSINESS_DAYS=${BUSINESS_DAYS} \
+            -e TREND_THRESHOLD=${TREND_THRESHOLD} \
+            -e HIGH_VARIANCE_THRESHOLD=${HIGH_VARIANCE_THRESHOLD} \
+            -e GIT_TOKEN=${{ secrets.GIT_TOKEN }} \
+            -e GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY_NAME} \
+            -e GITHUB_USERNAME=${GITHUB_USERNAME} \
+            -e TEMP_BASE=${TEMP_BASE} \
+            public.ecr.aws/y3y8k7w5/k8sresourceautoresizer:latest \
+            sh -c "/app/k8s-limits \
+              --directory /app/manifests \
+              --output ${TEMP_BASE}/TEMP/output.yaml \
+              --strategy ${{ github.event.inputs.strategy || 'ensemble' }} \
+              --history-window ${{ github.event.inputs.history_window || '24h' }} \
+              --cpu-percentile ${{ github.event.inputs.cpu_percentile || 95.0 }} \
+              --memory-buffer ${{ github.event.inputs.memory_buffer || 1.15 }} \
+              --debug"
