@@ -1,15 +1,16 @@
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
+
 from .base_strategy import BaseStrategy
 from .basic_strategy import BasicStrategy
-from .time_aware_strategy import TimeAwareStrategy
-from .workload_aware_strategy import WorkloadAwareStrategy
-from .trend_aware_strategy import TrendAwareStrategy
-from .quantile_regression_strategy import QuantileRegressionStrategy
 from .moving_average_strategy import MovingAverageStrategy
 
 # Removed pmdarima due to extremely slow performance in production environments
 # from .pmdarima_strategy import PMDARIMAStrategy
 from .prophet_strategy import ProphetStrategy
+from .quantile_regression_strategy import QuantileRegressionStrategy
+from .time_aware_strategy import TimeAwareStrategy
+from .trend_aware_strategy import TrendAwareStrategy
+from .workload_aware_strategy import WorkloadAwareStrategy
 
 
 class EnsembleStrategy(BaseStrategy):

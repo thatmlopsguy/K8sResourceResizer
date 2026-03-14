@@ -8,33 +8,35 @@ This module orchestrates the resource optimization process by:
 4. Processing deployments to update their resource configurations
 """
 
+import json
 import os
+import secrets
 import sys
+import tempfile
+from parser import get_applications_as_string
 from pathlib import Path
+
 import click
 from dotenv import load_dotenv
-from logger import setup_logger
-from utils import handle_exceptions, parse_duration
-from resource_optimizer import ResourceOptimizer
-from manifest_updater import process_deployments
-from parser import get_applications_as_string
+
 from argocd_client import apply_manifest
-import json
-import secrets
-from prompt_creator import build_model_prompt, python_incontext_learning
+from logger import setup_logger
+from manifest_updater import process_deployments
 from pr_opener import (
     clone_github_repo,
-    invoke_bedrock_model,
+    commit_and_push_changes,
     create_and_switch_to_branch,
     create_github_pull_request,
-    commit_and_push_changes,
+    invoke_bedrock_model,
 )
-import tempfile
+from prompt_creator import build_model_prompt, python_incontext_learning
+from resource_optimizer import ResourceOptimizer
+from utils import handle_exceptions, parse_duration
 
 # Add the Src directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from strategy import RecommendationStrategy, RecommendationConfig, StrategyFactory
+from strategy import RecommendationConfig, RecommendationStrategy, StrategyFactory
 
 # Load environment variables from .env file
 load_dotenv()

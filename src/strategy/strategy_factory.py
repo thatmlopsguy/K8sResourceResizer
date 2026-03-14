@@ -1,14 +1,14 @@
-from . import RecommendationStrategy, RecommendationConfig
-from .basic_strategy import BasicStrategy
-from .time_aware_strategy import TimeAwareStrategy
-from .trend_aware_strategy import TrendAwareStrategy
-from .workload_aware_strategy import WorkloadAwareStrategy
+from . import RecommendationConfig, RecommendationStrategy
 from .adaptive_strategy import AdaptiveStrategy
-from .quantile_regression_strategy import QuantileRegressionStrategy
+from .basic_strategy import BasicStrategy
+from .ensemble_strategy import EnsembleStrategy
 from .moving_average_strategy import MovingAverageStrategy
 from .pmdarima_strategy import PMDARIMAStrategy
 from .prophet_strategy import ProphetStrategy
-from .ensemble_strategy import EnsembleStrategy
+from .quantile_regression_strategy import QuantileRegressionStrategy
+from .time_aware_strategy import TimeAwareStrategy
+from .trend_aware_strategy import TrendAwareStrategy
+from .workload_aware_strategy import WorkloadAwareStrategy
 
 
 class StrategyFactory:

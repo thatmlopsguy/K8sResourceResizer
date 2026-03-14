@@ -1,9 +1,11 @@
+from typing import List, Optional
+
 import numpy as np
 import pandas as pd
-from typing import List, Optional
-from .base_strategy import BaseStrategy
-from prophet import Prophet
 from loguru import logger
+from prophet import Prophet
+
+from .base_strategy import BaseStrategy
 
 
 class ProphetStrategy(BaseStrategy):

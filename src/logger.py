@@ -13,9 +13,10 @@ Features:
 - Consistent formatting across outputs
 """
 
-from loguru import logger
-import sys
 import os
+import sys
+
+from loguru import logger
 
 
 # Configure loguru logger

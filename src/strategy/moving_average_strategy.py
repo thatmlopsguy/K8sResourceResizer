@@ -1,5 +1,7 @@
-import pandas as pd
 from typing import List, Optional
+
+import pandas as pd
+
 from .base_strategy import BaseStrategy
 
 

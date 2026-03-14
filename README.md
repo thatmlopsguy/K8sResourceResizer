@@ -1,5 +1,7 @@
 # K8sResourceResizer
 
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+
 A tool that optimizes Kubernetes resource limits and requests based on historical usage patterns.
 
 Fork of [K8sResourceAutoResizer](https://github.com/aws-samples/K8sResourceResizer) compatible with other prometheus providers

@@ -12,11 +12,13 @@ Key functionalities:
 - Error handling for malformed YAML
 """
 
-import os
-import yaml
 import json
+import os
+from typing import Dict, List, Optional
+
+import yaml
+
 from logger import logger
-from typing import List, Optional, Dict
 from utils import handle_exceptions
 
 

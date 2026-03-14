@@ -12,9 +12,10 @@ by logging errors with full context and re-raising them for proper handling.
 """
 
 import os
-from logger import logger
-from functools import wraps
 import re
+from functools import wraps
+
+from logger import logger
 
 
 def ensure_directory_exists(path):

@@ -1,6 +1,8 @@
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 import pandas as pd
-from typing import List, Optional, Dict, Any
+
 from .base_strategy import BaseStrategy
 
 

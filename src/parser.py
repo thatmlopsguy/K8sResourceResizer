@@ -1,7 +1,8 @@
 import os
+from typing import Dict, List, Optional
+
 import yaml
 from loguru import logger
-from typing import List, Optional, Dict
 
 
 class K8sResource:

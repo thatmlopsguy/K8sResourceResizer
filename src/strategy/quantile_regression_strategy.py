@@ -1,7 +1,9 @@
+from typing import List, Optional
+
 import numpy as np
 import pandas as pd
-from typing import List, Optional
 from statsmodels.regression.quantile_regression import QuantReg
+
 from .base_strategy import BaseStrategy
 
 

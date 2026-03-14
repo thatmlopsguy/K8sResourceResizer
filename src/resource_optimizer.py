@@ -8,13 +8,14 @@ This module provides functionality to:
 """
 
 from datetime import datetime, timedelta
-from severity import Severity
-from logger import logger
 from typing import Optional
+
+from logger import logger
+from severity import Severity
+from strategy import BasicStrategy
 
 # from amp_client import AMP
 from utils import handle_exceptions
-from strategy import BasicStrategy
 
 
 class ResourceOptimizer:

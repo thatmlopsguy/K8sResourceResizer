@@ -14,7 +14,7 @@ docker-build: ## Build Docker image locally
 	@docker build $(DOCKER_BUILD_ARGS) -t $(IMAGE):$(VERSION) -f $(DOCKERFILE) .
 
 ## @ Development
-.PHONY: pre-commit-run pre-commit-install pre-commit-update
+.PHONY: pre-commit-run pre-commit-install pre-commit-update lint format
 pre-commit-run: ## Run pre-commit hooks
 	@uv run prek run --all-files
 
@@ -24,3 +24,10 @@ pre-commit-install: ## Install pre-commit hooks
 
 pre-commit-update: ## Update pre-commit hooks
 	@uv run prek autoupdate
+
+lint: ## Run linters
+	@uv run ruff check .
+
+format: ## Run code formatters
+	@uv run ruff format
+	@uv run isort .

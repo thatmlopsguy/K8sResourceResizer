@@ -1,11 +1,11 @@
 import os
-
-# import boto3
-import subprocess
-from github import Github
-from git import Repo, GitCommandError
-from logger import logger
 import shutil
+import subprocess
+
+from git import GitCommandError, Repo
+from github import Github
+
+from logger import logger
 
 
 def invoke_bedrock_model(prompt, region):
