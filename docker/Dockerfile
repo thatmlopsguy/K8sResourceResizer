@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ARG TARGETPLATFORM=linux/amd64
-FROM --platform=$TARGETPLATFORM python:3.12-slim AS builder
+FROM --platform=$TARGETPLATFORM python:3.13-slim AS builder
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -13,7 +13,9 @@ ENV PYTHONUNBUFFERED=1 \
     STAN_BACKEND="CMDSTANPY"
 
 # Install system dependencies
-RUN apt upgrade -y && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+RUN apt upgrade -y  \
+    && apt-get update \ 
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     curl \
     git \
     pkg-config \
@@ -30,7 +32,7 @@ RUN apt upgrade -y && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get i
 # Copy project files
 WORKDIR /app
 COPY pyproject.toml ./
-COPY Src ./Src/
+COPY K8sResourceResizer/src ./src/
 
 # Upgrade pip and install Cython first
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
@@ -126,7 +128,7 @@ RUN PROPHET_PATH=$(python -c "import prophet; print(prophet.__path__[0])") && \
         Src/main.py
 
 # Install k3d, kubectl, and argocd
-COPY Docker/install.sh /install.sh
+COPY docker/install.sh /install.sh
 RUN chmod +x /install.sh && /install.sh
 
 # Update and upgrade all packages
@@ -165,7 +167,7 @@ COPY --from=docker:dind@sha256:e0b121dfc337c0f5a9703ef0914a392864bde6db811f2ba5b
 WORKDIR /app
 
 # Copy entrypoint script
-COPY Docker/entrypoint.sh /entrypoint.sh
+COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

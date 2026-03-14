@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "K8sResourceResizer"
-version = "0.1.0"
+version = "0.2.0"
 description = "A tool to manage k8s pod resources"
 authors = ["Hari Charan Ayada <hcayada@amazon.com>"]
-license = "mit"
+license = "MIT"
 readme = "README.md"
 packages = [
     { include = "Src" }
