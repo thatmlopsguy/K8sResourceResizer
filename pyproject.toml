@@ -45,3 +45,9 @@ line-length = 88
 profile = "black"
 line_length = 88
 src_paths = ["src"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v{version}"
+version = "0.2.0"
+update_changelog_on_bump = true

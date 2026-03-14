@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-world-staging
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    name: in-cluster
+    namespace: hello-world
+  source:
+    path: tests/kustomize/hello-world/overlay/staging
+    repoURL: https://github.com/thatmlopsguy/k8sresourceresizer
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

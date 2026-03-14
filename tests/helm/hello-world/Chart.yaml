@@ -1,0 +1,5 @@
+apiVersion: v2
+name: hello-world-chart
+description: A simple Hello World application with ingress
+version: 0.1.0
+appVersion: "1.0.0"

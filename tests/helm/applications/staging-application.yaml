@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-helm-world-staging
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/thatmlopsguy/k8sresourceresizer'
+    path: tests/helm/hello-world
+    helm:
+      valueFiles:
+        - environments/staging.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: hello-world-staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

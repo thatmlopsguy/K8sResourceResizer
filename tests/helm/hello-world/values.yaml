@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stress-ng-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stress-ng
+  template:
+    metadata:
+      labels:
+        app: stress-ng
+    spec:
+      containers:
+        - name: stress-ng
+          image: polinux/stress-ng
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              while true; do
+                # Generate random values for stress workers
+                cpu_workers=$((RANDOM % 4 + 1))  # Random number of CPU workers (1-4)
+                io_workers=$((RANDOM % 3 + 1))   # Random number of I/O workers (1-3)
+                vm_workers=$((RANDOM % 2 + 1))   # Random number of VM workers (1-2)
+                cpu_load=$((RANDOM % 100))       # Random CPU load (0-100)
+                timeout=$((RANDOM % 10 + 5))     # Random timeout (5-15 seconds)
+                fork_workers=$((RANDOM % 5 + 1)) # Random number of fork workers (1-5)
+                vm_bytes=$((RANDOM % 512 + 128))M # Random VM memory (128M - 512M)
+
+                # Debugging output to check generated values
+                echo "cpu_workers: $cpu_workers, io_workers: $io_workers, vm_workers: $vm_workers, cpu_load: $cpu_load, timeout: $timeout, fork_workers: $fork_workers, vm_bytes: $vm_bytes"
+
+                # Ensure at least one worker is specified (fallback to defaults if all are zero)
+                if [ $cpu_workers -eq 0 ] && [ $io_workers -eq 0 ] && [ $vm_workers -eq 0 ] && [ $fork_workers -eq 0 ]; then
+                  echo "Warning: All workers are set to 0, using default CPU and VM workers."
+                  cpu_workers=1  # Fallback to 1 CPU worker
+                  vm_workers=1   # Fallback to 1 VM worker
+                fi
+
+                # Run the stress-ng command with random parameters
+                stress-ng --cpu $cpu_workers \
+                          --cpu-load $cpu_load \
+                          --io $io_workers \
+                          --vm $vm_workers \
+                          --vm-bytes $vm_bytes \
+                          --fork $fork_workers \
+                          --timeout ${timeout}s \
+                          --aggressive \
+                          --metrics-brief
+
+                # Random sleep time between stress test runs
+                sleep $((RANDOM % 5 + 1))  # Random sleep time between 1 to 5 seconds
+              done
+
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stress-ng-service
+  namespace: default
+spec:
+  selector:
+    app: stress-ng
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP

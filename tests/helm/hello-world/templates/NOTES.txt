@@ -1,0 +1,7 @@
+Stress-ng deployment {{ include "hello-world-chart.fullname" . }} is running in namespace {{ .Release.Namespace }}.
+
+To check the status of the pods:
+  kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "hello-world-chart.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+To check the logs:
+  kubectl logs --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "hello-world-chart.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
