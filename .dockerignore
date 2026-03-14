@@ -1,0 +1,21 @@
+# .dockerignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Exclude development files
+.git
+.gitignore
+Dockerfile
+*.md
+.vscode
+
+# Exclude logs and cache
+logs/
+cache/
+
+.DS_Store
+.github/
+docs/
+tests/

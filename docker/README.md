@@ -1,16 +1,17 @@
 # Docker Environment for K8s Resource Optimization
 
-A Docker environment for running the Kubernetes Resource Optimizer with k3d, kubectl, and Argo CD. The setup runs without privileged mode for security and CI/CD platform compatibility.
+A Docker environment for running the Kubernetes Resource Optimizer with k3d, kubectl, and Argo CD. 
+The setup runs without privileged mode for security and CI/CD platform compatibility.
 
 ## Features
 
 - Non-privileged mode operation
 - Pre-installed tools:
-  - k3d (latest)
+  - kind (latest)
   - kubectl (latest stable)
   - Argo CD CLI (v2.7.3)
   - Resource Optimization tools
-- k3d cluster setup
+- kind cluster setup
 - Argo CD deployment
 - Local development and resource optimization modes
 
@@ -26,10 +27,10 @@ A Docker environment for running the Kubernetes Resource Optimizer with k3d, kub
 
 ```bash
 # Build with no cache
-docker build --no-cache -t k8sresourceautoresizer -f Docker/Dockerfile .
+docker build --no-cache -t k8sresourceautoresizer -f docker/Dockerfile .
 
 # Or regular build
-docker build -t k8sresourceautoresizer -f Docker/Dockerfile .
+docker build -t k8sresourceautoresizer -f docker/Dockerfile .
 ```
 
 ## Running the Container
@@ -85,7 +86,8 @@ docker run -it \
 ## Environment Variables
 
 ### Required
-- `CLUSTER_NAME`: Name for the k3d cluster
+
+- `CLUSTER_NAME`: Name for the kind cluster
 - `AWS_ACCESS_KEY_ID`: AWS access key (for AMP)
 - `AWS_SECRET_ACCESS_KEY`: AWS secret key (for AMP)
 - `AWS_REGION`: AWS region
@@ -95,6 +97,7 @@ docker run -it \
 - `GITHUB_TOKEN`: GitHub token for authentication
 
 ### Optional
+
 - `RUN_LOCAL`: Set to "true" for development mode
 - `BUSINESS_HOURS_START`: Start of business hours (default: 9)
 - `BUSINESS_HOURS_END`: End of business hours (default: 17)
@@ -105,14 +108,17 @@ docker run -it \
 ## Accessing Services
 
 ### Argo CD
+
 - URL: https://localhost:8080
 - Default credentials will be shown in container logs
 - Login using:
+
   ```bash
   argocd login localhost:8080 --username admin --password <password-from-logs> --insecure
   ```
 
 ### Kubernetes
+
 ```bash
 # Configure kubectl
 export KUBECONFIG=$(pwd)/kube/config
@@ -124,6 +130,7 @@ kubectl cluster-info
 ## Security Notes
 
 This setup improves security by:
+
 - Avoiding privileged mode
 - Using host networking instead of privileged network access
 - Mounting only necessary files and directories
@@ -171,7 +178,8 @@ docker rm $(docker ps -aq --filter ancestor=k8sresourceautoresizer)
 # Remove image (optional)
 docker rmi k8sresourceautoresizer
 ```
-## Security Notes
+
+## Security Considerations
 
 ### Docker Socket Mounting vs Privileged Mode
 
@@ -193,6 +201,7 @@ This setup uses Docker socket mounting (`-v /var/run/docker.sock:/var/run/docker
 ## Troubleshooting
 
 1. **Docker Socket Permission Issues**:
+
    ```bash
    # Add current user to docker group
    sudo usermod -aG docker $USER
@@ -211,6 +220,7 @@ This setup uses Docker socket mounting (`-v /var/run/docker.sock:/var/run/docker
    - Use absolute paths when needed
 
 For more detailed troubleshooting, check the logs with:
+
 ```bash
 docker logs <container_id>
-``` 
+```

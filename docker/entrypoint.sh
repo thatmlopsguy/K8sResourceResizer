@@ -71,7 +71,7 @@ export KUBECONFIG="${KUBECONFIG_DIR}/config"
 
 echo "🚀 === Installing Argo CD in the 'argocd' namespace ==="
 # Ensure the namespace exists before applying the manifest
-ARGOCD_VERSION="v2.14.2"  
+ARGOCD_VERSION="v2.14.2"
 echo "📦 Using Argo CD version: ${ARGOCD_VERSION}"
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml

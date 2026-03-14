@@ -14,7 +14,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 # Install system dependencies
 RUN apt upgrade -y  \
-    && apt-get update \ 
+    && apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     curl \
     git \
@@ -171,4 +171,3 @@ COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-

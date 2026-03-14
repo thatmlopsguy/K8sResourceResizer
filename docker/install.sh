@@ -10,7 +10,7 @@ mv ./kind /usr/local/bin/
 
 # Install kubectl using stable version
 echo "🛠️ === Installing kubectl ==="
-KUBECTL_VERSION="v1.32.2" 
+KUBECTL_VERSION="v1.32.2"
 echo "📦 Using kubectl version: ${KUBECTL_VERSION}"
 curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
     && chmod +x kubectl \
@@ -18,7 +18,7 @@ curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" 
 
 # Install Argo CD CLI
 echo "📦 === Installing Argo CD CLI ==="
-ARGOCD_VERSION="v2.14.2"  
+ARGOCD_VERSION="v2.14.2"
 echo "📦 Using Argo CD version: ${ARGOCD_VERSION}"
 curl -sSL -o /usr/local/bin/argocd \
     "https://github.com/argoproj/argo-cd/releases/download/${ARGOCD_VERSION}/argocd-linux-amd64"
