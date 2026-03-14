@@ -145,7 +145,7 @@ resources:
 autoscaling:
   enabled: true
   minReplicas: 3
-  maxReplicas: 6 
+  maxReplicas: 6
 ```
 
 Updated production.yaml after we apply resource optimization recommendations:
@@ -161,7 +161,7 @@ image:
 
 resources:
   limits:
-    cpu: 5625m  
+    cpu: 5625m
     memory: 2197Mi
   requests:
     cpu: 2812m
@@ -170,7 +170,7 @@ resources:
 autoscaling:
   enabled: true
   minReplicas: 3
-  maxReplicas: 6 
+  maxReplicas: 6
 ```
 
 Original memory_limit.yaml before we apply resource optimization recommendations:
@@ -226,18 +226,18 @@ Please provide your explanations for the recommendations in the following format
 
 The Resource Optimization Automation for EKS has identified these optimizations:
 
-## Strategy Name: 
+## Strategy Name:
 <brief explanation>
 
-##History window hours and business_hours taken into account # 
+##History window hours and business_hours taken into account #
 <brief explanation>
 
 # Changes to files
 - file name: <file name>
   namespace: <updated_deployments.namespace>
   deployment name: <updated_deployments.name>
-  environment name: <environment name> 
-  
+  environment name: <environment name>
+
   <brief explanation of changes for each file>
 
 Remember to thoroughly test your application after implementing these changes to ensure all functionalities remain intact.
@@ -253,13 +253,13 @@ def build_model_prompt(recommendations, repo_name):
 
     updated_file_paths_relative = get_updated_file_paths_relative(recommendations)
     updated_file_contents = get_updated_file_contents(recommendations)
-    
+
     prompt = f"Application: {repo_name}\n\Recommendations:\n"
     prompt += f"Recommendations: {recommendations}\n"
     prompt += f"- Updated kubernetes manifest file location: {updated_file_paths_relative}\n"
     prompt += f"  Updated kubernetes manifest file content: {updated_file_contents}\n"
     prompt += f"Analyze the recommendations and the updated kubernetes manifest files with the new resource usage values according to the example and instructions below.\n"
-    
+
     return prompt
 
 def get_updated_file_paths(recommendations):
@@ -267,7 +267,7 @@ def get_updated_file_paths(recommendations):
     updated_file_paths = []
     for deployment in recommendations['metadata']['updated_deployments']:
       updated_file_paths.append(deployment['updated_file'])
-    
+
     return updated_file_paths
 
 def get_updated_file_paths_relative(recommendations):
@@ -276,13 +276,13 @@ def get_updated_file_paths_relative(recommendations):
     for deployment in recommendations['metadata']['updated_deployments']:
       values_file_path_relative = deployment['updated_file'].split(f"/app/manifests/", 1)[1]
       updated_file_paths_relative.append(values_file_path_relative)
-    
+
     return updated_file_paths_relative
 
 def get_updated_file_contents(recommendations):
     # Initialize an empty list to store the values
     updated_file_content = []
-    for deployment in recommendations['metadata']['updated_deployments']: 
+    for deployment in recommendations['metadata']['updated_deployments']:
       with open(deployment['updated_file'], 'r') as file:
         updated_file_content.append(yaml.safe_load(file))
 

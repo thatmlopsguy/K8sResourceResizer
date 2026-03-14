@@ -15,7 +15,7 @@ def invoke_bedrock_model(prompt, region):
     Invoke the bedrock model to generate the pull request description
     """
     brt = boto3.client(service_name='bedrock-runtime', region_name=region)
-    
+
     # Construct the request body with the correct parameters
     body = json.dumps({
         "anthropic_version": "bedrock-2023-05-31",
@@ -29,7 +29,7 @@ def invoke_bedrock_model(prompt, region):
             }
         ]
     })
-    
+
     # Set Claude model ID (replace with your specific model if different)
     modelId = 'anthropic.claude-3-sonnet-20240229-v1:0'  # or specific Claude version like 'anthropic.claude-3-haiku-20240307-v1:0'
     accept = 'application/json'
@@ -38,7 +38,7 @@ def invoke_bedrock_model(prompt, region):
 
     # Send the request
     response = brt.invoke_model(body=body, modelId=modelId, accept=accept, contentType=contentType)
-    
+
     # Parse the response
     response_body = json.loads(response.get('body').read())
 
@@ -48,7 +48,7 @@ def invoke_bedrock_model(prompt, region):
         return generated_content[0].get('text')  # Access the "text" within the first content item if it exists
     else:
         return None
-    
+
 def delete_local_repo(local_dir):
     """
     Delete local directory of the repository if already exists
@@ -65,13 +65,13 @@ def create_github_pull_request(repository_name, source_branch, destination_branc
     github_token = os.environ.get('GIT_TOKEN')
     if not github_token:
         raise ValueError("GITHUB_TOKEN environment variable is not set")
-    
+
     g = Github(github_token)
-    
+
     try:
         # Get the repository
         repo = g.get_repo(repository_name)
-        
+
         # Create the pull request
         pr = repo.create_pull(
             title=title,
@@ -79,7 +79,7 @@ def create_github_pull_request(repository_name, source_branch, destination_branc
             head=source_branch,
             base=destination_branch
         )
-        
+
         logger.info(f"Pull Request Created: {pr.html_url}")
         return pr.number
     except Exception as e:
@@ -121,10 +121,10 @@ def create_and_switch_to_branch(repo_path, new_branch_name):
     """
     try:
         repo = Repo(repo_path)
-        
+
         new_branch = repo.create_head(new_branch_name)
         new_branch.checkout()
-        
+
         logger.info(f"Branch '{new_branch_name}' created.")
         return True
     except GitCommandError as e:
@@ -140,7 +140,7 @@ def commit_and_push_changes(recommendations, local_dir, branch_name, repo_url):
     """
     # Initialize Git repository
     repo = Repo(local_dir)
-    
+
     # Set up the remote URL with your GitHub token
     remote_url=repo_url
     origin = repo.remote('origin')
@@ -153,12 +153,12 @@ def commit_and_push_changes(recommendations, local_dir, branch_name, repo_url):
     updated_file_paths = get_updated_file_paths(recommendations)
     updated_file_contents = get_updated_file_contents(recommendations)
     updated_file_paths_relative = get_updated_file_paths_relative(recommendations)
-    
+
     for deployment in recommendations['metadata']['updated_deployments']:
         values_file_path_relative = deployment['updated_file'].split(f"/app/manifests/", 1)[1]
         # Directly copy the file content without YAML parsing
         shutil.copy2(deployment['updated_file'], f"{local_dir}/{values_file_path_relative}")
-        
+
         # Commit changes
         repo.git.add(values_file_path_relative)
         repo.git.commit('-m', 'Updating values with recommendations')

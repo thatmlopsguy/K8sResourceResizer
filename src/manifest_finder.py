@@ -121,7 +121,7 @@ def get_applications_as_string(directory: str, selector: Optional[str] = None) -
     yaml_files = get_yaml_files(directory)
     resources = parse_yaml(yaml_files)
     applications = get_applications(resources, selector)
-    
+
     for app in applications:
         app["metadata"]["namespace"] = "argocd"
         spec = app.get("spec", {})
@@ -133,7 +133,7 @@ def get_applications_as_string(directory: str, selector: Optional[str] = None) -
         spec["syncPolicy"] = {
             "syncOptions": ["CreateNamespace=true"]
         }
-        
+
     return yaml.dump_all([app for app in applications])
 
 
@@ -141,13 +141,13 @@ def get_applications_as_string(directory: str, selector: Optional[str] = None) -
 def find_helm_resource_files(base_dir: str, path: str, helm_values: list[str], deployment_name: str) -> Optional[str]:
     """Find resource definitions in Helm values files."""
     logger.debug(f"Looking for Helm values files in {base_dir}/{path}")
-    
+
     # Check each values file
     for value_file in helm_values:
         full_path = os.path.join(base_dir, path, value_file)
         if not os.path.exists(full_path):
             continue
-            
+
         with open(full_path, 'r') as f:
             try:
                 content = yaml.safe_load(f)
@@ -157,7 +157,7 @@ def find_helm_resource_files(base_dir: str, path: str, helm_values: list[str], d
             except yaml.YAMLError:
                 logger.warning(f"Error parsing YAML in {full_path}")
                 continue
-    
+
     logger.debug(f"No Helm values files found with resource definitions")
     return None
 
@@ -167,22 +167,22 @@ def find_kustomize_resource_files(base_dir: str, path: str, deployment_name: str
     """Find resource definitions in Kustomize files."""
     logger.debug(f"Looking for Kustomize files in {base_dir}/{path}")
     logger.debug(f"Searching for deployment: {deployment_name}")
-    
+
     kustomization_path = os.path.join(base_dir, path, "kustomization.yaml")
     logger.debug(f"Checking kustomization path: {kustomization_path}")
-    
+
     if not os.path.exists(kustomization_path):
         kustomization_path = os.path.join(base_dir, path, "kustomization.yml")
         logger.debug(f"First path not found, checking alternate: {kustomization_path}")
         if not os.path.exists(kustomization_path):
             logger.debug(f"No kustomization file found in {path}")
             return None
-    
+
     try:
         with open(kustomization_path, 'r') as f:
             content = yaml.safe_load(f)
             logger.debug(f"Loaded kustomization content: {json.dumps(content, indent=2)}")
-            
+
             if not content:
                 logger.debug("Empty kustomization file")
                 return None
@@ -192,7 +192,7 @@ def find_kustomize_resource_files(base_dir: str, path: str, deployment_name: str
                 if not os.path.exists(file_path):
                     logger.debug(f"File does not exist: {file_path}")
                     return None
-                    
+
                 try:
                     with open(file_path, 'r') as f:
                         file_content = yaml.safe_load(f)
@@ -213,14 +213,14 @@ def find_kustomize_resource_files(base_dir: str, path: str, deployment_name: str
                             if 'limits' in resources or 'requests' in resources:
                                 logger.debug(f"Found patch with resource definitions in {file_path}")
                                 return file_path
-                            
+
                 except Exception as e:
                     logger.debug(f"Error checking file {file_path}: {str(e)}")
                 return None
 
             # Check both resources and patches in current directory
             all_files = []
-            
+
             # Add resources
             resources = content.get('resources', [])
             logger.debug(f"Found resources in {kustomization_path}: {resources}")
@@ -228,7 +228,7 @@ def find_kustomize_resource_files(base_dir: str, path: str, deployment_name: str
                 resource_path = os.path.abspath(os.path.join(os.path.dirname(kustomization_path), resource))
                 logger.debug(f"Adding resource path: {resource_path}")
                 all_files.append(resource_path)
-            
+
             # Add patches
             patches = content.get('patches', [])
             logger.debug(f"Found patches in {kustomization_path}: {patches}")
@@ -243,7 +243,7 @@ def find_kustomize_resource_files(base_dir: str, path: str, deployment_name: str
                     patch_path = os.path.abspath(os.path.join(os.path.dirname(kustomization_path), patch_path))
                     logger.debug(f"Adding patch path: {patch_path}")
                     all_files.append(patch_path)
-            
+
             # Check all files
             logger.debug(f"Checking all files: {all_files}")
             for file_path in all_files:
@@ -258,7 +258,7 @@ def find_kustomize_resource_files(base_dir: str, path: str, deployment_name: str
                     result = check_file_for_deployment(file_path)
                     if result:
                         return result
-            
+
             # Check bases if nothing found
             bases = content.get('bases', [])
             for base in bases:
@@ -268,13 +268,13 @@ def find_kustomize_resource_files(base_dir: str, path: str, deployment_name: str
                     result = find_kustomize_resource_files(base_dir, relative_path, deployment_name)
                     if result:
                         return result
-    
+
     except yaml.YAMLError as e:
         logger.warning(f"Error parsing YAML in {kustomization_path}: {e}")
         return None
     except Exception as e:
         logger.warning(f"Error processing {kustomization_path}: {str(e)}")
         return None
-    
+
     logger.debug(f"No Kustomize files found with resource definitions")
     return None

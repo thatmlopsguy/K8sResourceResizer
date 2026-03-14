@@ -45,4 +45,4 @@ from .moving_average_strategy import MovingAverageStrategy
 from .pmdarima_strategy import PMDARIMAStrategy
 from .prophet_strategy import ProphetStrategy
 from .ensemble_strategy import EnsembleStrategy
-from .strategy_factory import StrategyFactory 
+from .strategy_factory import StrategyFactory

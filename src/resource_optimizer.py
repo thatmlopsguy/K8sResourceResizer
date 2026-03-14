@@ -22,7 +22,7 @@ class ResourceOptimizer:
     def __init__(self, workspace_id: str, region: str, strategy: 'BasicStrategy'):
         """
         Initialize the resource optimizer.
-        
+
         Args:
             workspace_id: AMP workspace ID
             region: AWS region
@@ -39,7 +39,7 @@ class ResourceOptimizer:
         logger.info("Getting all deployments in the cluster")
         query = 'kube_deployment_spec_replicas != 0'
         result = self.amp.query(query)
-        
+
         deployments = [
             {
                 'namespace': deployment['metric']['namespace'],
@@ -47,7 +47,7 @@ class ResourceOptimizer:
             }
             for deployment in result['data']['result']
         ]
-        
+
         logger.info(f"Found {len(deployments)} deployments")
         return deployments
 
@@ -55,7 +55,7 @@ class ResourceOptimizer:
     def get_historical_usage(self, namespace: str, deployment: str, container: str) -> dict:
         """Get historical CPU and memory usage for a deployment."""
         logger.debug(f"Getting historical usage for {deployment} in {namespace}")
-        
+
         # Get current time and calculate time window
         end_time = datetime.now()
         history_hours = self.strategy.config.history_window_hours
@@ -64,25 +64,25 @@ class ResourceOptimizer:
 
         logger.debug(f"Using time window of {history_hours} hours")
         logger.debug(f"Time range: from {start_time} to {end_time}")
-        
+
         # CPU usage query with rate over 5m to smooth spikes
         cpu_query = f'''sum(rate(container_cpu_usage_seconds_total{{
             namespace="{namespace}",
             pod=~"{deployment}-[a-z0-9]+-[a-z0-9]+",
             container="{container}"
         }}[5m])) by (container)'''
-        
+
         # Memory usage query
         memory_query = f'''sum(container_memory_working_set_bytes{{
             namespace="{namespace}",
             pod=~"{deployment}-[a-z0-9]+-[a-z0-9]+",
             container="{container}"
         }}) by (container)'''
-        
+
         # Convert to Unix timestamps for AMP API
         start_timestamp = int(start_time.timestamp())
         end_timestamp = int(end_time.timestamp())
-        
+
         # Get historical data
         cpu_data = self.amp.query_range(
             query=cpu_query,
@@ -90,28 +90,28 @@ class ResourceOptimizer:
             end=end_timestamp,
             step='5m'
         )
-        
+
         memory_data = self.amp.query_range(
             query=memory_query,
             start=start_timestamp,
             end=end_timestamp,
             step='5m'
         )
-        
+
         # Extract values and timestamps
         cpu_samples = []
         memory_samples = []
         timestamps = []
-        
+
         if cpu_data.get('data', {}).get('result'):
             for point in cpu_data['data']['result'][0]['values']:
                 timestamps.append(float(point[0]))
                 cpu_samples.append(float(point[1]))
-                
+
         if memory_data.get('data', {}).get('result'):
             for point in memory_data['data']['result'][0]['values']:
                 memory_samples.append(float(point[1]))
-                
+
         return {
             'cpu_samples': cpu_samples,
             'memory_samples': memory_samples,
@@ -141,7 +141,7 @@ class ResourceOptimizer:
         MIN_CPU = 0.01
         # Maximum of 64 cores (typical node CPU limit)
         MAX_CPU = 64.0
-        
+
         return max(MIN_CPU, min(cpu_cores, MAX_CPU))
 
     def _validate_memory_request(self, memory_bytes: float) -> float:
@@ -150,7 +150,7 @@ class ResourceOptimizer:
         MIN_MEMORY = 32 * 1024 * 1024
         # Maximum of 256Gi (typical node memory limit)
         MAX_MEMORY = 256 * 1024 * 1024 * 1024
-        
+
         return max(MIN_MEMORY, min(memory_bytes, MAX_MEMORY))
 
     def _calculate_cpu_limit(self, cpu_request: float) -> float:
@@ -164,7 +164,7 @@ class ResourceOptimizer:
         else:  # For large containers (>=1 core)
             # Use 2x for large containers
             limit = cpu_request * 2.0
-        
+
         return self._validate_cpu_request(limit)
 
     def _calculate_memory_limit(self, memory_request: float) -> float:
@@ -176,42 +176,42 @@ class ResourceOptimizer:
         else:
             # Use 1.3x for larger containers
             limit = memory_request * 1.3
-        
+
         return self._validate_memory_request(limit)
 
     @handle_exceptions
     def generate_recommendations(self) -> dict:
         """Generate resource recommendations using the configured strategy."""
         logger.info("Generating recommendations for all deployments")
-        
+
         # Get all deployments
         deployments = self.get_deployments()
-        
+
         # Get recommendations for each deployment
         recommendations = {}
         for deployment in deployments:
             namespace = deployment['namespace']
             name = deployment['name']
             deployment_key = f"{namespace}/{name}"
-            
+
             # Get containers in deployment
             query = f'''kube_pod_container_info{{
                 namespace="{namespace}",
                 pod=~"{name}-[a-z0-9]+-[a-z0-9]+"
             }}'''
             result = self.amp.query(query)
-            
+
             containers = list({
                 container['metric']['container']
                 for container in result['data']['result']
             })
-            
+
             logger.info(f"Found {len(containers)} containers in deployment {name}")
-            
+
             # Get recommendations for each container
             for container in containers:
                 usage = self.get_historical_usage(namespace, name, container)
-                
+
                 # Calculate and validate requests
                 cpu_request = self._validate_cpu_request(
                     self.strategy.calculate_cpu_request(
@@ -225,11 +225,11 @@ class ResourceOptimizer:
                         usage['timestamps']
                     )
                 )
-                
+
                 # Calculate limits based on validated requests
                 cpu_limit = self._calculate_cpu_limit(cpu_request)
                 memory_limit = self._calculate_memory_limit(memory_request)
-                
+
                 container_key = f"{deployment_key}/{container}"
                 recommendations[container_key] = {
                     'object': {
@@ -260,7 +260,7 @@ class ResourceOptimizer:
                         }
                     }
                 }
-        
+
         logger.info(f"Generated recommendations for {len(recommendations)} containers")
         return recommendations
 
@@ -268,11 +268,11 @@ class ResourceOptimizer:
     def prepare_recommendations_to_save(self, recommendations: dict, updated_deployments: list[dict] = None) -> dict:
         """
         Prepare recommendations data structure for saving.
-        
+
         Args:
             recommendations: Dictionary of resource recommendations
             updated_deployments: List of updated deployments with their file paths
-            
+
         Returns:
             dict: Structured recommendations data with metadata
         """
@@ -282,7 +282,7 @@ class ResourceOptimizer:
             strategy_description = paragraphs[0] if paragraphs else ""
         else:
             strategy_description = ""
-        
+
         # Create metadata section
         metadata = {
             "timestamp": datetime.now().isoformat(),
@@ -302,7 +302,7 @@ class ResourceOptimizer:
             },
             "updated_deployments": updated_deployments or []
         }
-        
+
         # Create the final output structure
         return {
             "metadata": metadata,

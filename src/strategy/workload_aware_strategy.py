@@ -6,7 +6,7 @@ from .base_strategy import BaseStrategy
 class WorkloadAwareStrategy(BaseStrategy):
     """
     Workload-aware resource recommendation strategy that adapts to workload characteristics.
-    
+
     Algorithm:
     - Classifies workloads based on usage variance (stable/moderate/intensive)
     - CPU: Uses 99th percentile for CPU-intensive workloads, 95th for others
@@ -17,9 +17,9 @@ class WorkloadAwareStrategy(BaseStrategy):
     def calculate_cpu_request(self, cpu_samples: List[float], timestamps: Optional[List[float]] = None) -> float:
         if not cpu_samples:
             return self.config.min_cpu_cores
-            
+
         workload_type = self._detect_workload_type(cpu_samples, timestamps)
-        
+
         if workload_type == 'intensive':
             # Use 99th percentile for CPU-intensive workloads
             return max(np.percentile(cpu_samples, 99) * 1.1, self.config.min_cpu_cores)
@@ -33,10 +33,10 @@ class WorkloadAwareStrategy(BaseStrategy):
     def calculate_memory_request(self, memory_samples: List[float], timestamps: Optional[List[float]] = None) -> float:
         if not memory_samples:
             return self.config.min_memory_bytes
-            
+
         workload_type = self._detect_workload_type(memory_samples, timestamps)
         peak = max(memory_samples)
-        
+
         if workload_type == 'intensive':
             # Add 30% buffer for memory-intensive workloads
             return max(peak * 1.3, self.config.min_memory_bytes)
@@ -50,7 +50,7 @@ class WorkloadAwareStrategy(BaseStrategy):
     def _detect_workload_type(self, samples: List[float], timestamps: Optional[List[float]] = None) -> str:
         if not samples:
             return 'stable'
-            
+
         # Create time series for better analysis
         if timestamps:
             df = pd.DataFrame({
@@ -60,16 +60,16 @@ class WorkloadAwareStrategy(BaseStrategy):
             # Calculate rolling statistics
             df['rolling_mean'] = df['value'].rolling(window=6, min_periods=1).mean()
             df['rolling_std'] = df['value'].rolling(window=6, min_periods=1).std()
-            
+
             # Calculate various metrics
             mean = df['rolling_mean'].mean()
             std = df['rolling_std'].mean()
             peak_to_mean = df['value'].max() / mean if mean != 0 else 0
             cv = std / mean if mean != 0 else 0  # coefficient of variation
-            
+
             # Detect sudden spikes
             spikes = df[df['value'] > (mean + 2 * std)].shape[0] / len(df)
-            
+
             # Classify based on multiple factors
             if cv > self.config.high_variance_threshold or spikes > 0.1:
                 return 'intensive'
@@ -82,10 +82,10 @@ class WorkloadAwareStrategy(BaseStrategy):
             mean = np.mean(samples)
             std = np.std(samples)
             cv = std / mean if mean != 0 else 0
-            
+
             if cv > self.config.high_variance_threshold:
                 return 'intensive'
             elif cv > self.config.high_variance_threshold / 2:
                 return 'moderate'
             else:
-                return 'stable' 
+                return 'stable'

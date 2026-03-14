@@ -28,9 +28,9 @@ def apply_manifest(manifest_path: str) -> None:
     manifest_path = Path(manifest_path).resolve()
     if not manifest_path.is_file():
         raise ValueError(f"Invalid manifest path: {manifest_path}")
-        
+
     kubectl= "/usr/local/bin/kubectl"
-        
+
     logger.info(f"Applying manifest: {manifest_path}")
     result = subprocess.run(
         [kubectl, "apply", "-f", str(manifest_path)],  # Using full path from shutil.which
@@ -40,10 +40,10 @@ def apply_manifest(manifest_path: str) -> None:
         check=False,
         shell=False
     )
-    
+
     if result.returncode != 0:
         raise RuntimeError(f"Failed to apply manifest: {result.stderr}")
-    
+
     logger.info("Successfully applied manifest")
 
 
@@ -98,4 +98,3 @@ def get_argocd_app_git_path(argocd_app: str) -> Optional[tuple[str, str]]:
 
     logger.debug(f"No Git repo and path found for ArgoCD app {argocd_app}")
     return None
-

@@ -25,9 +25,9 @@ class StrategyFactory:
             RecommendationStrategy.PROPHET: ProphetStrategy,
             RecommendationStrategy.ENSEMBLE: EnsembleStrategy
         }
-        
+
         strategy_class = strategies.get(config.strategy)
         if not strategy_class:
             raise ValueError(f"Unknown strategy: {config.strategy}")
-        
-        return strategy_class(config) 
+
+        return strategy_class(config)

@@ -14,11 +14,11 @@ class BaseStrategy(ABC):
     def calculate_cpu_request(self, cpu_samples: List[float], timestamps: Optional[List[float]] = None) -> float:
         """
         Calculate the recommended CPU request based on usage samples.
-        
+
         Args:
             cpu_samples: List of CPU usage samples
             timestamps: Optional list of timestamps for the samples
-            
+
         Returns:
             float: Recommended CPU request in cores
         """
@@ -28,12 +28,12 @@ class BaseStrategy(ABC):
     def calculate_memory_request(self, memory_samples: List[float], timestamps: Optional[List[float]] = None) -> float:
         """
         Calculate the recommended memory request based on usage samples.
-        
+
         Args:
             memory_samples: List of memory usage samples in bytes
             timestamps: Optional list of timestamps for the samples
-            
+
         Returns:
             float: Recommended memory request in bytes
         """
-        pass 
+        pass

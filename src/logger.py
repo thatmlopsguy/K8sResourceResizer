@@ -25,7 +25,7 @@ def setup_logger(debug=False):
     # Get log level from environment variable, default to INFO if not set
     # Override with debug flag if it's True
     console_level = "DEBUG" if debug else os.getenv("DEBUG_LEVEL", "INFO").upper()
-    
+
     # Add console handler with colored output
     logger.add(
         sys.stdout,
@@ -33,7 +33,7 @@ def setup_logger(debug=False):
         level=console_level,
         colorize=True
     )
-    
+
     # Add file handler for all logs
     logger.add(
         "logs/k8s_limits_auto_resizer.log",
@@ -45,4 +45,4 @@ def setup_logger(debug=False):
 
     # Log initial configuration
     logger.debug("Logger initialized with level={}", console_level)
-    return logger 
+    return logger

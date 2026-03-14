@@ -2,6 +2,9 @@
 
 A tool that optimizes Kubernetes resource limits and requests based on historical usage patterns.
 
+Fork of [K8sResourceAutoResizer](https://github.com/aws-samples/K8sResourceResizer) compatible with other prometheus providers
+and with a more modular design to support multiple strategies and easier maintenance.
+
 ## Overview
 
 `K8sResourceResizer` optimizes Kubernetes resource configurations through historical usage pattern analysis.

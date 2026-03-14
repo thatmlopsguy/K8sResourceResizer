@@ -29,7 +29,7 @@ import tempfile
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from strategy import (
-    RecommendationStrategy, 
+    RecommendationStrategy,
     RecommendationConfig,
     StrategyFactory
 )
@@ -79,7 +79,7 @@ def main(directory, output, debug, strategy, cpu_percentile, memory_buffer, hist
     # Initialize logger with debug flag
     logger = setup_logger(debug=debug)
     logger.info("Starting resource optimization process")
-    
+
     # Parse history window
     try:
         history_hours = parse_duration(history_window)
@@ -87,7 +87,7 @@ def main(directory, output, debug, strategy, cpu_percentile, memory_buffer, hist
     except ValueError as e:
         logger.error(f"Invalid history window format: {e}")
         sys.exit(1)
-    
+
     # Create TEMP directory
     temp_base = tempfile.mkdtemp(prefix='k8s_resource_')
     temp_dir = os.path.join(temp_base, "TEMP")
@@ -105,11 +105,11 @@ def main(directory, output, debug, strategy, cpu_percentile, memory_buffer, hist
         high_variance_threshold=float(os.getenv('HIGH_VARIANCE_THRESHOLD', '0.5')),
         history_window_hours=history_hours
     )
-    
+
     # Create strategy instance
     strategy_instance = StrategyFactory.create_strategy(config)
     logger.info(f"Using {strategy} strategy for recommendations")
-    
+
     # Get modified YAML
     modified_yaml = get_applications_as_string(directory)
 
@@ -121,30 +121,30 @@ def main(directory, output, debug, strategy, cpu_percentile, memory_buffer, hist
     # Apply the manifest
     logger.info(f"Applying the manifest: {output}")
     apply_manifest(output)
-    
+
     # Initialize the resource optimizer with strategy
     optimizer = ResourceOptimizer(
         workspace_id=os.getenv('AMP_WORKSPACE_ID'),
         region=os.getenv('AWS_REGION'),
         strategy=strategy_instance
     )
-    
+
     # Generate recommendations
     recommendations = optimizer.generate_recommendations()
-    
+
     # Process deployments and get updated deployments
     updated_deployments = process_deployments(recommendations, directory)
     logger.info(f"Updated {len(updated_deployments)} deployments")
-    
+
     # Prepare recommendations data structure
     logger.info("Preparing recommendations data structure")
     recommendations_data = optimizer.prepare_recommendations_to_save(recommendations, updated_deployments)
-    
+
     # Save recommendations to file
     logger.info(f"Using TEMP directory: {temp_dir}")
     with open(os.path.join(temp_dir, "recommendations.json"), 'w') as f:
         json.dump(recommendations_data, f, indent=2)
-    
+
     logger.info("Resource optimization process completed")
 
     logger.info("Starting automated process to create pull request")
@@ -170,7 +170,7 @@ def main(directory, output, debug, strategy, cpu_percentile, memory_buffer, hist
     create_and_switch_to_branch(local_dir, new_branch_name)
     commit_and_push_changes(recommendations_data, local_dir, new_branch_name, repo_url)
 
-    
+
     source_branch = new_branch_name
     destination_branch = "main"
     title = "K8s manifest resource usage updates, please take a look and update with the following recommendations"

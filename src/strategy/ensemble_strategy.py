@@ -14,13 +14,13 @@ from .prophet_strategy import ProphetStrategy
 class EnsembleStrategy(BaseStrategy):
     """
     Ensemble strategy that combines predictions from multiple models.
-    
+
     Algorithm:
     - Runs multiple strategies in parallel
     - Weights predictions based on historical accuracy
     - Uses voting for final recommendation
     - Adapts weights based on performance
-    
+
     Note: PMDARima strategy has been removed due to extremely slow performance
     in production environments. While it can provide good predictions, its
     computational overhead makes it impractical for real-time resource optimization.
@@ -58,20 +58,20 @@ class EnsembleStrategy(BaseStrategy):
         total_error = sum(errors.values())
         if total_error > 0:
             new_weights = {
-                name: (1 - error/total_error) 
+                name: (1 - error/total_error)
                 for name, error in errors.items()
             }
             # Normalize weights
             weight_sum = sum(new_weights.values())
             self.weights = {
-                name: weight/weight_sum 
+                name: weight/weight_sum
                 for name, weight in new_weights.items()
             }
 
     def calculate_cpu_request(self, cpu_samples: List[float], timestamps: Optional[List[float]] = None) -> float:
         if not cpu_samples or not timestamps:
             return self.config.min_cpu_cores
-            
+
         # Get predictions from all strategies
         predictions = {}
         for name, strategy in self.strategies.items():
@@ -81,17 +81,17 @@ class EnsembleStrategy(BaseStrategy):
             except Exception as e:
                 # If a strategy fails, use the minimum value
                 predictions[name] = self.config.min_cpu_cores
-        
+
         # Calculate weighted prediction
         weighted_pred = self._get_weighted_prediction(predictions)
-        
+
         # Add some safety margin
         return max(weighted_pred * 1.1, self.config.min_cpu_cores)
 
     def calculate_memory_request(self, memory_samples: List[float], timestamps: Optional[List[float]] = None) -> float:
         if not memory_samples or not timestamps:
             return self.config.min_memory_bytes
-            
+
         # Get predictions from all strategies
         predictions = {}
         for name, strategy in self.strategies.items():
@@ -101,9 +101,9 @@ class EnsembleStrategy(BaseStrategy):
             except Exception as e:
                 # If a strategy fails, use the minimum value
                 predictions[name] = self.config.min_memory_bytes
-        
+
         # Calculate weighted prediction
         weighted_pred = self._get_weighted_prediction(predictions)
-        
+
         # Apply memory buffer
-        return max(weighted_pred * self.config.memory_buffer, self.config.min_memory_bytes) 
+        return max(weighted_pred * self.config.memory_buffer, self.config.min_memory_bytes)

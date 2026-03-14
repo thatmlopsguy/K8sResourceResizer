@@ -14,4 +14,4 @@ class Severity(str, Enum):
     CRITICAL = "CRITICAL"
     WARNING = "WARNING"
     OK = "OK"
-    GOOD = "GOOD" 
+    GOOD = "GOOD"

@@ -30,37 +30,37 @@ def ensure_directory_exists(path):
 def parse_duration(duration_str: str) -> int:
     """
     Parse a human-readable duration string into hours.
-    
+
     Supports formats:
     - Hours: 24h, 12h
     - Days: 7d, 14d
     - Weeks: 1w, 2w
     - Years: 1yr, 2yr
-    
+
     Args:
         duration_str (str): Duration string (e.g., "24h", "7d", "8w", "1yr")
-        
+
     Returns:
         int: Number of hours
-        
+
     Raises:
         ValueError: If the format is invalid
     """
     if not duration_str:
         return 24  # Default to 24 hours
-        
+
     pattern = re.compile(r'^(\d+)(h|d|w|yr)$')
     match = pattern.match(duration_str.lower())
-    
+
     if not match:
         raise ValueError(
             "Invalid duration format. Use: "
             "##h for hours, ##d for days, ##w for weeks, ##yr for years"
         )
-    
+
     value, unit = match.groups()
     value = int(value)
-    
+
     # Convert to hours
     multipliers = {
         'h': 1,
@@ -68,7 +68,7 @@ def parse_duration(duration_str: str) -> int:
         'w': 24 * 7,
         'yr': 24 * 365
     }
-    
+
     return value * multipliers[unit]
 
 def handle_exceptions(func):
