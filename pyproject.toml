@@ -22,6 +22,12 @@ dependencies = [
     "statsmodels>=0.14.6",
 ]
 
+[project.scripts]
+# Expose CLI entrypoint 'k8s-limits' that invokes the main() function
+# Module path uses the package name under src/ which in this repository
+# is installed as the top-level package `src` (see src/__init__.py).
+k8s-limits = "src.main:main"
+
 [tool.setuptools]
 packages = ["src"]
 package-dir = { "src" = "src" }

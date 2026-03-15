@@ -5,7 +5,7 @@ import subprocess
 from git import GitCommandError, Repo
 from github import Github
 
-from logger import logger
+from .logger import logger
 
 
 def invoke_bedrock_model(prompt, region):
@@ -35,23 +35,18 @@ def invoke_bedrock_model(prompt, region):
     # If/when re-enabled, parse response as needed and return the generated text.
 
 
-def delete_local_repo(local_dir):
-    """
-    Delete local directory of the repository if already exists
-    """
-    if os.path.exists(local_dir):
-        # Use shutil instead of os.system/subprocess for directory removal
-        shutil.rmtree(local_dir, ignore_errors=True)
-
-
 def create_github_pull_request(
-    repository_name, source_branch, destination_branch, title, description
+    repository_name: str,
+    source_branch: str,
+    destination_branch: str,
+    title: str,
+    description: str,
 ):
     """
     Create pull request based on the new remote branch pushed
     """
     # Use the GitHub token from environment variables
-    github_token = os.environ.get("GIT_TOKEN")
+    github_token = os.environ.get("GITHUB_TOKEN")
     if not github_token:
         raise ValueError("GITHUB_TOKEN environment variable is not set")
 
@@ -73,7 +68,7 @@ def create_github_pull_request(
         return None
 
 
-def clone_github_repo(repo_url, local_dir):
+def clone_github_repo(repo_url: str, local_dir: str):
     """
     Clone remote repository with manifests
     """
@@ -105,7 +100,7 @@ def clone_github_repo(repo_url, local_dir):
         raise
 
 
-def create_and_switch_to_branch(repo_path, new_branch_name):
+def create_and_switch_to_branch(repo_path, new_branch_name) -> bool:
     """
     Create a new branch and switch to it locally to prepare for the pull request
     """
@@ -125,7 +120,7 @@ def create_and_switch_to_branch(repo_path, new_branch_name):
         return False
 
 
-def commit_and_push_changes(recommendations, local_dir, branch_name, repo_url):
+def commit_and_push_changes(recommendations, local_dir, branch_name, repo_url) -> bool:
     """
     Commit and push all the changes to the new branch of the repository
     """

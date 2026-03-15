@@ -17,10 +17,10 @@ from typing import Tuple
 
 import yaml
 
-from argocd_client import get_argocd_instance
-from logger import logger
-from manifest_finder import find_helm_resource_files, find_kustomize_resource_files
-from utils import handle_exceptions
+from .argocd_client import get_argocd_instance
+from .logger import logger
+from .manifest_finder import find_helm_resource_files, find_kustomize_resource_files
+from .utils import handle_exceptions
 
 
 @handle_exceptions

@@ -2,6 +2,8 @@
 set -eu
 
 CLUSTER_NAME="${CLUSTER_NAME:-k8s-limits-cluster}"
+ARGOCD_VERSION="${ARGOCD_VERSION:-v2.14.2}"
+
 # Function to wait for a specific resource to be ready
 wait_for_resource() {
   local namespace="$1"
@@ -71,9 +73,8 @@ export KUBECONFIG="${KUBECONFIG_DIR}/config"
 
 echo "🚀 === Installing Argo CD in the 'argocd' namespace ==="
 # Ensure the namespace exists before applying the manifest
-ARGOCD_VERSION="v2.14.2"
 echo "📦 Using Argo CD version: ${ARGOCD_VERSION}"
-kubectl create namespace argocd
+kubectl create namespace argocd || echo "⚠️ Namespace 'argocd' already exists, skipping creation."
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml
 
 # Wait for Argo CD server deployment to be available

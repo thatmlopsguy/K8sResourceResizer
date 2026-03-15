@@ -18,8 +18,8 @@ from typing import Dict, List, Optional
 
 import yaml
 
-from logger import logger
-from utils import handle_exceptions
+from .logger import logger
+from .utils import handle_exceptions
 
 
 @handle_exceptions

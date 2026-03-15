@@ -13,30 +13,24 @@ import os
 import secrets
 import sys
 import tempfile
-from parser import get_applications_as_string
-from pathlib import Path
 
 import click
 from dotenv import load_dotenv
 
-from argocd_client import apply_manifest
-from logger import setup_logger
-from manifest_updater import process_deployments
-from pr_opener import (
+from .argocd_client import apply_manifest
+from .logger import setup_logger
+from .manifest_updater import process_deployments
+from .parser import get_applications_as_string
+from .pr_opener import (
     clone_github_repo,
     commit_and_push_changes,
     create_and_switch_to_branch,
     create_github_pull_request,
-    invoke_bedrock_model,
 )
-from prompt_creator import build_model_prompt, python_incontext_learning
-from resource_optimizer import ResourceOptimizer
-from utils import handle_exceptions, parse_duration
-
-# Add the Src directory to Python path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from strategy import RecommendationConfig, RecommendationStrategy, StrategyFactory
+from .prometheus_client import create_prometheus_client
+from .resource_optimizer import ResourceOptimizer
+from .strategy import RecommendationConfig, RecommendationStrategy, StrategyFactory
+from .utils import handle_exceptions, parse_duration
 
 # Load environment variables from .env file
 load_dotenv()
@@ -80,9 +74,30 @@ load_dotenv()
     default="24h",
     help="Historical data window (e.g., 24h, 7d, 8w, 1yr). Default: 24h",
 )
+@click.option(
+    "--prometheus-url",
+    default=None,
+    envvar="PROMETHEUS_URL",
+    help="URL of the Prometheus-compatible endpoint.",
+)
+@click.option(
+    "--prometheus-provider",
+    type=click.Choice(["prometheus", "aws", "azure", "coralogix", "victoria_metrics"]),
+    default="prometheus",
+    envvar="PROMETHEUS_PROVIDER",
+    help="Prometheus-compatible provider type. Default: prometheus",
+)
 @handle_exceptions
 def main(
-    directory, output, debug, strategy, cpu_percentile, memory_buffer, history_window
+    directory,
+    output,
+    debug,
+    strategy,
+    cpu_percentile,
+    memory_buffer,
+    history_window,
+    prometheus_url,
+    prometheus_provider,
 ):
     """Main function to run the resource optimization process."""
     # Initialize logger with debug flag
@@ -133,11 +148,27 @@ def main(
     logger.info(f"Applying the manifest: {output}")
     apply_manifest(output)
 
+    # Initialize the Prometheus client
+    prom_client = None
+    if prometheus_url:
+        prom_kwargs: dict = {}
+        if prometheus_provider == "aws":
+            aws_region = os.getenv("AWS_REGION", "us-east-1")
+            prom_kwargs["aws_region"] = aws_region
+            # AWSPrometheusConfig picks up credentials from the environment
+        prom_client = create_prometheus_client(
+            url=prometheus_url,
+            provider=prometheus_provider,
+            **prom_kwargs,
+        )
+        logger.info(f"Prometheus client initialised (provider={prometheus_provider})")
+    else:
+        logger.warning("No --prometheus-url supplied; metrics queries will be skipped")
+
     # Initialize the resource optimizer with strategy
     optimizer = ResourceOptimizer(
-        workspace_id=os.getenv("AMP_WORKSPACE_ID"),
-        region=os.getenv("AWS_REGION"),
         strategy=strategy_instance,
+        prometheus_client=prom_client,
     )
 
     # Generate recommendations
@@ -159,12 +190,11 @@ def main(
         json.dump(recommendations_data, f, indent=2)
 
     logger.info("Resource optimization process completed")
-
-    logger.info("Starting automated process to create pull request")
+    logger.info("Starting automated process to create pull request ...")
 
     github_username = os.getenv("GITHUB_USERNAME")
     repo_name = os.getenv("GITHUB_REPOSITORY_NAME")
-    github_token = os.environ.get("GIT_TOKEN")
+    github_token = os.environ.get("GITHUB_TOKEN")
     if not github_token:
         raise ValueError("GITHUB_TOKEN environment variable is not set")
 
@@ -173,13 +203,6 @@ def main(
     random_number = secrets.randbelow(1000) + 1  # Generate number between 1 and 1000
     new_branch_name = f"update_resources_k8s_manifests_{random_number}"
     clone_github_repo(repo_url, local_dir)
-
-    model_prompt = build_model_prompt(recommendations_data, repo_name)
-    final_model_prompt = (
-        python_incontext_learning + model_prompt
-    )  # Adding in-context learning
-    region = os.getenv("AWS_REGION")
-    response_for_pr_description = invoke_bedrock_model(final_model_prompt, region)
 
     repository_full_name = f"{github_username}/{repo_name}"
     create_and_switch_to_branch(local_dir, new_branch_name)
@@ -194,7 +217,6 @@ def main(
         source_branch,
         destination_branch,
         title,
-        response_for_pr_description,
     )
     logger.info("Automation process finished successfully")
 

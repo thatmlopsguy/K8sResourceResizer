@@ -31,3 +31,18 @@ lint: ## Run linters
 format: ## Run code formatters
 	@uv run ruff format
 	@uv run isort .
+
+argo-cd-password: ## Get Argo CD initial admin password
+	@kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+
+argo-cd-ui: ## Access argocd ui
+	@kubectl port-forward svc/argocd-server -n argocd 8088:443
+
+.PHONY: bump-version bump-preview
+##@ Release
+bump-version: ## Bump project version
+	@uv run cz bump
+
+bump-preview: ## Preview next version and changelog (dry-run)
+	@uv run cz bump --get-next
+	@uv run cz changelog --dry-run

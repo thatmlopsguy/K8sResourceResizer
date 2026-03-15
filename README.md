@@ -29,7 +29,7 @@ or integrate it into CI/CD pipelines with GitHub Actions.
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Python 3.13 or higher
 - Access to Kubernetes cluster
 - ArgoCD for GitOps integration
 

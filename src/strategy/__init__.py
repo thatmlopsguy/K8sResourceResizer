@@ -7,8 +7,6 @@ from enum import Enum
 from typing import List
 
 from .adaptive_strategy import AdaptiveStrategy as AdaptiveStrategy
-
-# Export all strategy classes (explicit re-exports to satisfy linters)
 from .base_strategy import BaseStrategy as BaseStrategy
 from .basic_strategy import BasicStrategy as BasicStrategy
 from .ensemble_strategy import EnsembleStrategy as EnsembleStrategy
@@ -22,21 +20,6 @@ from .strategy_factory import StrategyFactory as StrategyFactory
 from .time_aware_strategy import TimeAwareStrategy as TimeAwareStrategy
 from .trend_aware_strategy import TrendAwareStrategy as TrendAwareStrategy
 from .workload_aware_strategy import WorkloadAwareStrategy as WorkloadAwareStrategy
-
-__all__ = [
-    "BaseStrategy",
-    "BasicStrategy",
-    "TimeAwareStrategy",
-    "TrendAwareStrategy",
-    "WorkloadAwareStrategy",
-    "AdaptiveStrategy",
-    "QuantileRegressionStrategy",
-    "MovingAverageStrategy",
-    "PMDARIMAStrategy",
-    "ProphetStrategy",
-    "EnsembleStrategy",
-    "StrategyFactory",
-]
 
 
 class RecommendationStrategy(Enum):
@@ -66,3 +49,20 @@ class RecommendationConfig:
     trend_threshold: float = 0.1
     high_variance_threshold: float = 0.5
     history_window_hours: int = 24  # Default to 24 hours of historical data
+
+
+# Import submodules after types are defined to avoid circular imports
+__all__ = [
+    "BaseStrategy",
+    "BasicStrategy",
+    "TimeAwareStrategy",
+    "TrendAwareStrategy",
+    "WorkloadAwareStrategy",
+    "AdaptiveStrategy",
+    "QuantileRegressionStrategy",
+    "MovingAverageStrategy",
+    "PMDARIMAStrategy",
+    "ProphetStrategy",
+    "EnsembleStrategy",
+    "StrategyFactory",
+]

@@ -28,3 +28,8 @@ cache/
 docs/
 tests/
 logs/
+
+# secret files
+.env
+.secrets
+.secret.example

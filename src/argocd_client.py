@@ -17,8 +17,8 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from logger import logger
-from utils import handle_exceptions
+from .logger import logger
+from .utils import handle_exceptions
 
 
 @handle_exceptions

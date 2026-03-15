@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: 'https://github.com/thatmlopsguy/k8sresourceresizer'
-    path: tests/helm/hello-world
+    path: tests/integration/helm/hello-world
     helm:
       valueFiles:
         - environments/production.yaml

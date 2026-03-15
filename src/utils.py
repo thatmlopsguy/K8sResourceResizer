@@ -13,9 +13,10 @@ by logging errors with full context and re-raising them for proper handling.
 
 import os
 import re
+import shutil
 from functools import wraps
 
-from logger import logger
+from .logger import logger
 
 
 def ensure_directory_exists(path):
@@ -68,6 +69,15 @@ def parse_duration(duration_str: str) -> int:
     multipliers = {"h": 1, "d": 24, "w": 24 * 7, "yr": 24 * 365}
 
     return value * multipliers[unit]
+
+
+def delete_local_repo(local_dir):
+    """
+    Delete local directory of the repository if already exists
+    """
+    if os.path.exists(local_dir):
+        # Use shutil instead of os.system/subprocess for directory removal
+        shutil.rmtree(local_dir, ignore_errors=True)
 
 
 def handle_exceptions(func):

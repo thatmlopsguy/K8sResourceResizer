@@ -2,7 +2,7 @@
 Resource Optimizer for Kubernetes.
 
 This module provides functionality to:
-1. Query AMP metrics for CPU and memory usage
+1. Query Prometheus-compatible metrics for CPU and memory usage
 2. Generate resource recommendations based on usage patterns
 3. Save recommendations for further processing
 """
@@ -10,26 +10,30 @@ This module provides functionality to:
 from datetime import datetime, timedelta
 from typing import Optional
 
-from logger import logger
-from severity import Severity
-from strategy import BasicStrategy
-
-# from amp_client import AMP
-from utils import handle_exceptions
+from .logger import logger
+from .prometheus_client import PrometheusClient
+from .severity import Severity
+from .strategy import BasicStrategy
+from .utils import handle_exceptions
 
 
 class ResourceOptimizer:
-    def __init__(self, workspace_id: str, region: str, strategy: "BasicStrategy"):
+    def __init__(
+        self,
+        strategy: "BasicStrategy",
+        prometheus_client: Optional[PrometheusClient] = None,
+    ):
         """
         Initialize the resource optimizer.
 
         Args:
-            workspace_id: AMP workspace ID
-            region: AWS region
-            strategy: Strategy instance for generating recommendations
+            strategy: Strategy instance for generating recommendations.
+            prometheus_client: A configured PrometheusClient instance.
+                If ``None``, methods that query metrics will return empty
+                results.
         """
         logger.info("Initializing resource optimizer")
-        # self.amp = AMP(workspace_id, region)
+        self.prometheus = prometheus_client
         self.strategy = strategy
         logger.info(
             f"Successfully initialized resource optimizer with strategy: {strategy.__class__.__name__}"
@@ -39,22 +43,21 @@ class ResourceOptimizer:
     def get_deployments(self) -> list:
         """Get all deployments in the cluster."""
         logger.info("Getting all deployments in the cluster")
-        # If AMP client isn't configured, return an empty list instead of failing
-        if not hasattr(self, "amp") or self.amp is None:
+        if self.prometheus is None:
             logger.warning(
-                "AMP client not configured; returning empty deployments list"
+                "Prometheus client not configured; returning empty deployments list"
             )
             return []
 
         query = "kube_deployment_spec_replicas != 0"
-        result = self.amp.query(query)
+        result = self.prometheus.query(query)
 
         deployments = [
             {
                 "namespace": deployment["metric"]["namespace"],
                 "name": deployment["metric"]["deployment"],
             }
-            for deployment in result.get("data", {}).get("result", [])
+            for deployment in result
         ]
 
         logger.info(f"Found {len(deployments)} deployments")
@@ -90,17 +93,13 @@ class ResourceOptimizer:
             container="{container}"
         }}) by (container)'''
 
-        # Convert to Unix timestamps for AMP API
-        start_timestamp = int(start_time.timestamp())
-        end_timestamp = int(end_time.timestamp())
-
         # Get historical data
-        cpu_data = self.amp.query_range(
-            query=cpu_query, start=start_timestamp, end=end_timestamp, step="5m"
+        cpu_data = self.prometheus.query_range(
+            query=cpu_query, start_time=start_time, end_time=end_time, step="5m"
         )
 
-        memory_data = self.amp.query_range(
-            query=memory_query, start=start_timestamp, end=end_timestamp, step="5m"
+        memory_data = self.prometheus.query_range(
+            query=memory_query, start_time=start_time, end_time=end_time, step="5m"
         )
 
         # Extract values and timestamps
@@ -108,13 +107,13 @@ class ResourceOptimizer:
         memory_samples = []
         timestamps = []
 
-        if cpu_data.get("data", {}).get("result"):
-            for point in cpu_data["data"]["result"][0]["values"]:
+        if cpu_data:
+            for point in cpu_data[0]["values"]:
                 timestamps.append(float(point[0]))
                 cpu_samples.append(float(point[1]))
 
-        if memory_data.get("data", {}).get("result"):
-            for point in memory_data["data"]["result"][0]["values"]:
+        if memory_data:
+            for point in memory_data[0]["values"]:
                 memory_samples.append(float(point[1]))
 
         return {
@@ -206,13 +205,10 @@ class ResourceOptimizer:
                 namespace="{namespace}",
                 pod=~"{name}-[a-z0-9]+-[a-z0-9]+"
             }}'''
-            result = self.amp.query(query)
+            result = self.prometheus.query(query)
 
             containers = list(
-                {
-                    container["metric"]["container"]
-                    for container in result["data"]["result"]
-                }
+                {container["metric"]["container"] for container in result}
             )
 
             logger.info(f"Found {len(containers)} containers in deployment {name}")

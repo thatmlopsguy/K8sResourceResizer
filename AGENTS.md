@@ -10,25 +10,13 @@ It covers build, lint, and test commands; code style guidelines; and conventions
 ### Build Docker Image
 
 To build the Docker image:
+
 ```bash
 docker build --no-cache -t k8sresourceautoresizer -f Dockerfile .
 ```
 
-### Run Tests
-
-To execute the test suite:
-```bash
-pytest tests/
-```
-
-#### Run a Single Test
-
-For a specific test file or test case:
-```bash
-pytest tests/test_file.py::SpecificTestCase
-```
-
 ### Pre-commit Hooks
+
 This repository uses pre-commit hooks to maintain code quality. Ensure hooks are installed and up to date:
 
 #### Install Hooks
@@ -48,6 +36,23 @@ uv run prek run --all-files
 ```bash
 uv run prek autoupdate
 ```
+
+The following hooks are configured in `.pre-commit-config.yaml`:
+
+- **Safety checks**:
+  - `mixed-line-ending`: Ensures consistent line endings.
+  - `trailing-whitespace`: Removes trailing whitespace.
+  - `end-of-file-fixer`: Ensures files end with a newline.
+
+- **Code quality**:
+  - `ruff`: Lints Python files and autofixes issues.
+  - `validate-pyproject`: Validates `pyproject.toml`.
+
+- **Security checks**:
+  - `detect-private-key`: Prevents private keys from being committed.
+
+- **Commit message standardization**:
+  - `commitizen`: Enforces conventional commit messages.
 
 ---
 
@@ -79,8 +84,6 @@ The following conventions should be adhered to in all code contributions:
   def add(a: int, b: int) -> int:
       return a + b
   ```
-
-- Use `mypy` for type checking.
 
 ### Naming Conventions
 
@@ -137,25 +140,6 @@ The following conventions should be adhered to in all code contributions:
 - Avoid overly large files; refactor into smaller, logical components.
 
 ---
-
-## Pre-commit Hooks
-
-The following hooks are configured in `.pre-commit-config.yaml`:
-
-- **Safety checks**:
-  - `mixed-line-ending`: Ensures consistent line endings.
-  - `trailing-whitespace`: Removes trailing whitespace.
-  - `end-of-file-fixer`: Ensures files end with a newline.
-
-- **Code quality**:
-  - `ruff`: Lints Python files and autofixes issues.
-  - `validate-pyproject`: Validates `pyproject.toml`.
-
-- **Security checks**:
-  - `detect-private-key`: Prevents private keys from being committed.
-
-- **Commit message standardization**:
-  - `commitizen`: Enforces conventional commit messages.
 
 ### Running Individual Hooks
 

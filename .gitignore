@@ -80,3 +80,7 @@ dist/
 
 # logs
 logs/
+
+# secret files
+.env
+.secrets
