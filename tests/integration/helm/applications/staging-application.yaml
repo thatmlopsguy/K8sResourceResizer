@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: hello-helm-world-staging
+  name: helm-hello-world-staging
   namespace: argocd
 spec:
   project: default

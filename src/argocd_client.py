@@ -13,6 +13,7 @@ Key features:
 """
 
 import json
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -29,7 +30,7 @@ def apply_manifest(manifest_path: str) -> None:
     if not manifest_path.is_file():
         raise ValueError(f"Invalid manifest path: {manifest_path}")
 
-    kubectl = "/usr/local/bin/kubectl"
+    kubectl = shutil.which("kubectl") or "kubectl"
 
     logger.info(f"Applying manifest: {manifest_path}")
     result = subprocess.run(
@@ -55,7 +56,8 @@ def apply_manifest(manifest_path: str) -> None:
 @handle_exceptions
 def get_argocd_instance() -> Optional[List[Dict[str, Any]]]:
     """Get ArgoCD applications using ArgoCD CLI."""
-    argocd_bin = "/usr/local/bin/argocd"
+
+    argocd_bin = shutil.which("argocd") or "/usr/local/bin/argocd"
 
     result = subprocess.run(
         [
@@ -85,8 +87,10 @@ def get_argocd_instance() -> Optional[List[Dict[str, Any]]]:
 @handle_exceptions
 def get_argocd_app_git_path(argocd_app: str) -> Optional[tuple[str, str]]:
     """Use ArgoCD CLI to get the app's Git repo and path."""
+    argocd_bin = shutil.which("argocd") or "/usr/local/bin/argocd"
+
     result = subprocess.run(
-        ["argocd", "app", "get", argocd_app, "--output", "json"],
+        [argocd_bin, "app", "get", argocd_app, "--output", "json"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,

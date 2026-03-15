@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: hello-world-production
+  name: kustomize-hello-world-production
   namespace: argocd
 spec:
   project: default
   destination:
     name: in-cluster
-    namespace: hello-world
+    namespace: hello-world-production
   source:
     path: tests/integration/kustomize/hello-world/overlay/production
     repoURL: 'https://github.com/thatmlopsguy/k8sresourceresizer'

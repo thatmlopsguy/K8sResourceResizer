@@ -96,6 +96,13 @@ class PrometheusClient:
         )
         self.config = config
         self._client: CustomPrometheusConnect = get_custom_prometheus_connect(config)
+        # Ensure compatibility with prometrix client implementation: some
+        # CustomPrometheusConnect implementations expect an attribute named
+        # `ssl_verification`. If it's missing, set a safe default using the
+        # config value when available, otherwise default to True.
+        if not hasattr(self._client, "ssl_verification"):
+            default_ssl = getattr(config, "ssl_verification", True)
+            setattr(self._client, "ssl_verification", default_ssl)
 
         # Verify connectivity
         self._client.check_prometheus_connection()

@@ -161,7 +161,7 @@ def main(
             provider=prometheus_provider,
             **prom_kwargs,
         )
-        logger.info(f"Prometheus client initialised (provider={prometheus_provider})")
+        logger.info(f"Prometheus client initialized (provider={prometheus_provider})")
     else:
         logger.warning("No --prometheus-url supplied; metrics queries will be skipped")
 

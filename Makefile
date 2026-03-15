@@ -61,6 +61,12 @@ argo-cd-password: ## Get Argo CD initial admin password
 argo-cd-ui: ## Access argocd ui
 	@kubectl port-forward svc/argocd-server -n argocd 8088:443
 
+argo-cd-login: ## Login to argocd
+	@argocd login --insecure localhost:8088 --username admin --password $(shell kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+
+argo-cd-apps: ## List argocd apps
+	@argocd app list
+
 .PHONY: bump-version bump-preview
 ##@ Release
 bump-version: ## Bump project version
