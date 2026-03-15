@@ -77,7 +77,7 @@ echo "🚀 === Installing Argo CD in the 'argocd' namespace ==="
 # Ensure the namespace exists before applying the manifest
 echo "📦 Using Argo CD version: ${ARGOCD_VERSION}"
 kubectl create namespace argocd || echo "⚠️ Namespace 'argocd' already exists, skipping creation."
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml
+kubectl apply --server-side -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml
 
 # Wait for Argo CD server deployment to be available
 wait_for_resource "argocd" "deployment" "argocd-server" "available" "600"
