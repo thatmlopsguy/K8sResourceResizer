@@ -1,0 +1,56 @@
+# Site configuration
+site_url: https://thatmlopsguy.github.io/K8sResourceResizer/
+site_name: K8sResourceResizer
+site_description: A tool that optimizes Kubernetes resource limits and requests based on historical usage patterns.
+site_author: That MLOps Guy
+
+
+# Repository
+repo_url: https://github.com/thatmlopsguy/K8sResourceResizer
+repo_name: K8sResourceResizer
+
+# Copyright
+copyright: Copyright &copy; 2026 That MLOps Guy
+
+# Navigation
+nav:
+  - Introduction: index.md
+  - Docker: docker.md
+
+# Configuration
+theme:
+  name: "material"
+  locale: en
+  font: false
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets:
+      check_paths: true
+
+# Extra configuration
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/thatmlopsguy/
+    - icon: fontawesome/solid/globe
+      link: https://thatmlopsguy.github.io/

@@ -7,7 +7,7 @@
 
 A tool that optimizes Kubernetes resource limits and requests based on historical usage patterns.
 
-Fork of [K8sResourceAutoResizer](https://github.com/aws-samples/K8sResourceResizer) compatible with other prometheus providers
+Fork of AWS [K8sResourceAutoResizer](https://github.com/aws-samples/K8sResourceResizer) compatible with other prometheus providers
 and with a more modular design to support multiple strategies and easier maintenance.
 
 ## Overview
@@ -67,11 +67,6 @@ docker run -it \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/kube:/root/.kube \
   -v $(pwd):/app \
-  -e CLUSTER_NAME=eks-blog-demo \
-  -e AWS_ACCESS_KEY_ID=your-access-key \
-  -e AWS_SECRET_ACCESS_KEY=your-secret-key \
-  -e AWS_REGION=your-region \
-  -e AMP_WORKSPACE_ID=your-workspace-id \
   -e GITHUB_REPOSITORY_NAME=your-repo-name \
   -e GITHUB_USERNAME=your-gh-username \
   -e GITHUB_TOKEN=your-gh-token \
@@ -88,7 +83,8 @@ docker run -it \
 ## CI/CD Configuration
 
 This project provides a [DOCKERFILE](Dockerfile), that you can use to build and run it on your preferred CI/CD tool.
-The `K8sLimitsAutoResizer` docker image is meant to run on CI/CD pipelines where you have your K8s manifests and ArgoCD projects. Check the `Docker`, `Usage`, and `Configuration` sections below.
+The `K8sLimitsAutoResizer` docker image is meant to run on CI/CD pipelines where you have your K8s manifests and ArgoCD projects.
+Check the `Docker`, `Usage`, and `Configuration` sections below.
 
 ### GitHub Actions Setup
 
@@ -166,18 +162,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Login to AWS ECR Public
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Sts GetCallerIdentity
-        run: |
-          aws sts get-caller-identity
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Run resource analyzer
         env:
@@ -200,17 +185,6 @@ jobs:
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v ${{ github.workspace }}:/app/manifests \
             -v ${TEMP_BASE}:${TEMP_BASE} \
-            -v ~/.aws:/root/.aws \
-            -e AWS_REGION \
-            -e AWS_DEFAULT_REGION \
-            -e AWS_ACCESS_KEY_ID \
-            -e AWS_SECRET_ACCESS_KEY \
-            -e AWS_SESSION_TOKEN \
-            -e AWS_SECURITY_TOKEN \
-            -e AWS_ROLE_ARN \
-            -e AWS_WEB_IDENTITY_TOKEN_FILE \
-            -e AMP_WORKSPACE_ID=${{ secrets.AMP_WORKSPACE_ID }} \
-            -e CLUSTER_NAME=${{ secrets.CLUSTER_NAME }} \
             -e BUSINESS_HOURS_START=${BUSINESS_HOURS_START} \
             -e BUSINESS_HOURS_END=${BUSINESS_HOURS_END} \
             -e BUSINESS_DAYS=${BUSINESS_DAYS} \
@@ -220,7 +194,7 @@ jobs:
             -e GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY_NAME} \
             -e GITHUB_USERNAME=${GITHUB_USERNAME} \
             -e TEMP_BASE=${TEMP_BASE} \
-            public.ecr.aws/y3y8k7w5/k8sresourceautoresizer:latest \
+             ghcr.io/thatmlopsguy/k8sresourceautoresizer:latest \
             sh -c "/app/k8s-limits \
               --directory /app/manifests \
               --output ${TEMP_BASE}/TEMP/output.yaml \
@@ -236,7 +210,7 @@ jobs:
 The resource optimization process follows these steps:
 
 1. **Data Collection**
-   - Connects to Amazon Managed Prometheus (AMP)
+   - Connects to Prometheus Compatible data source (e.g., AMP, Prometheus, VictoriaMetrics)
    - Queries historical CPU and memory usage metrics
    - Collects data for specified time window (default: 24h)
 
@@ -244,11 +218,11 @@ The resource optimization process follows these steps:
    - Processes historical usage patterns
    - Identifies deployment and container configurations
    - Analyzes metrics using the selected strategy:
-     * Basic statistical analysis
-     * Time-based patterns
-     * Workload characteristics
-     * Growth trends
-     * Seasonal variations
+     - Basic statistical analysis
+     - Time-based patterns
+     - Workload characteristics
+     - Growth trends
+     - Seasonal variations
 
 3. **Recommendation Generation**
    - Calculates optimal resource requests and limits
@@ -276,10 +250,10 @@ The resource optimization process follows these steps:
 
 7. **Output Generation**
    - Creates detailed JSON report with:
-     * Strategy metadata
-     * Configuration details
-     * Updated deployments
-     * Resource recommendations
+     - Strategy metadata
+     - Configuration details
+     - Updated deployments
+     - Resource recommendations
    - Logs all actions and changes
 
 8. **Validation & Safety**
@@ -322,7 +296,8 @@ HISTORY_WINDOW=7d
 
 ### Basic Strategy
 
-Simple statistical analysis using percentiles and standard deviations of historical resource usage. Best for workloads with stable, consistent resource patterns.
+Simple statistical analysis using percentiles and standard deviations of historical resource usage.
+Best for workloads with stable, consistent resource patterns.
 
 - Uses: Mean, median, and percentile calculations
 - Good for: Stable applications with predictable resource usage
@@ -404,17 +379,16 @@ Combines predictions from multiple strategies using weighted averaging for more 
   - Memory requests and limits
 
 - Integration with:
-  - Amazon Managed Prometheus (AMP)
+  - Prometheus Compatible data sources (e.g., AMP, Prometheus, VictoriaMetrics)
   - Argo CD
-  - EKS
-  - Bedrock
+  - Kubernetes manifests (Helm charts, Kustomize)
+  - OpenAI compatible LLMs for enhanced analysis and recommendations
 
 ## Installation
 
 ```bash
 # Install basic version
-poetry install
-
+uv pip install -e .
 ```
 
 ## Usage
@@ -423,13 +397,13 @@ poetry install
 
 ```bash
 # Basic usage
-python -m K8sResourceResizer.Src.main --directory /path/to/manifests
+uv run python -m src.main --directory /path/to/manifests
 
 # With specific strategy
-python -m K8sResourceResizer.Src.main --strategy ensemble --directory /path/to/manifests
+uv run python -m src.main --strategy ensemble --directory /path/to/manifests
 
 # Debug mode
-python -m K8sResourceResizer.Src.main --debug --directory /path/to/manifests
+uv run python -m src.main --debug --directory /path/to/manifests
 ```
 
 ### Docker Usage
@@ -439,7 +413,6 @@ For Docker-based usage, refer to the [Running Locally](#running-locally) section
 - Building the Docker image
 - Running in local development mode
 - Running with resource optimization
-- Production setup with GitHub Actions and IAM roles
 
 The container supports two main modes:
 
@@ -451,7 +424,6 @@ The container supports two main modes:
 
 2. **Resource Optimization** (second command):
    - Runs ensemble strategy for optimal resource recommendations
-   - Uses IAM roles via AWS profiles for secure authentication
    - Configurable parameters for fine-tuning recommendations
    - Outputs results to mounted volumes
 
@@ -465,13 +437,11 @@ Both approaches use secure configuration:
 
 Environment variables:
 
-- `AMP_WORKSPACE_ID`: Amazon Managed Prometheus workspace ID
-- `AWS_REGION`: AWS region
 - `BUSINESS_HOURS_START`: Start of business hours (default: 9)
 - `BUSINESS_HOURS_END`: End of business hours (default: 17)
 - `BUSINESS_DAYS`: Business days (default: 0,1,2,3,4 where 0=Monday)
 - `RUN_LOCAL`: Set to "true" to keep container running for local development (default: false)
-- `CLUSTER_NAME`: Name of the k3d cluster to create
+- `CLUSTER_NAME`: Name of the kind cluster to create
 - `GITHUB_REPOSITORY_NAME`: Name of the GitHub Repository
 - `GITHUB_USERNAME`: GitHub user name
 - `GITHUB_TOKEN`: GitHub token for authentication

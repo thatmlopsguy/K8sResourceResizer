@@ -94,3 +94,8 @@ bump-version: ## Bump project version
 bump-preview: ## Preview next version and changelog (dry-run)
 	@uv run cz bump --get-next
 	@uv run cz changelog --dry-run
+
+.PHONY: docs-serve
+##@ Docs
+docs-serve: ## Serve documentation locally
+	@uv run mkdocs serve

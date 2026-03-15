@@ -7,9 +7,9 @@ The setup runs without privileged mode for security and CI/CD platform compatibi
 
 - Non-privileged mode operation
 - Pre-installed tools:
-  - kind (latest)
-  - kubectl (latest stable)
-  - Argo CD CLI (v2.7.3)
+  - kind
+  - kubectl
+  - Argo CD CLI
   - Resource Optimization tools
 - kind cluster setup
 - Argo CD deployment
@@ -18,7 +18,6 @@ The setup runs without privileged mode for security and CI/CD platform compatibi
 ## Prerequisites
 
 - Docker installed on host machine
-- AWS credentials (for AMP access)
 - Available ports:
   - 8080 (Argo CD UI)
   - 6550 (Kubernetes API)
@@ -27,10 +26,10 @@ The setup runs without privileged mode for security and CI/CD platform compatibi
 
 ```bash
 # Build with no cache
-docker build --no-cache -t k8sresourceautoresizer -f docker/Dockerfile .
+docker build --no-cache -t k8sresourceautoresizer -f Dockerfile .
 
 # Or regular build
-docker build -t k8sresourceautoresizer -f docker/Dockerfile .
+docker build -t k8sresourceautoresizer -f Dockerfile .
 ```
 
 ## Running the Container
@@ -57,10 +56,6 @@ docker run -it \
   -v $(pwd)/kube:/root/.kube \
   -v $(pwd):/app \
   -e CLUSTER_NAME=eks-blog-demo \
-  -e AWS_ACCESS_KEY_ID=your-access-key \
-  -e AWS_SECRET_ACCESS_KEY=your-secret-key \
-  -e AWS_REGION=your-region \
-  -e AMP_WORKSPACE_ID=your-workspace-id \
   -e GITHUB_REPOSITORY_NAME=your-repo-name \
   -e GITHUB_USERNAME=your-gh-username \
   -e GITHUB_TOKEN=your-gh-token \
@@ -88,10 +83,6 @@ docker run -it \
 ### Required
 
 - `CLUSTER_NAME`: Name for the kind cluster
-- `AWS_ACCESS_KEY_ID`: AWS access key (for AMP)
-- `AWS_SECRET_ACCESS_KEY`: AWS secret key (for AMP)
-- `AWS_REGION`: AWS region
-- `AMP_WORKSPACE_ID`: Amazon Managed Prometheus workspace ID
 - `GITHUB_REPOSITORY_NAME`: Name of the GitHub Repository
 - `GITHUB_USERNAME`: GitHub user name
 - `GITHUB_TOKEN`: GitHub token for authentication
@@ -109,7 +100,7 @@ docker run -it \
 
 ### Argo CD
 
-- URL: https://localhost:8080
+- URL: `https://localhost:8080`
 - Default credentials will be shown in container logs
 - Login using:
 
@@ -127,32 +118,6 @@ export KUBECONFIG=$(pwd)/kube/config
 kubectl cluster-info
 ```
 
-## Security Notes
-
-This setup improves security by:
-
-- Avoiding privileged mode
-- Using host networking instead of privileged network access
-- Mounting only necessary files and directories
-- Restricting container capabilities
-
-## Troubleshooting
-
-1. Container startup issues:
-   - Verify Docker socket permissions
-   - Check port availability (8080, 6550)
-   - Ensure AWS credentials are correct
-
-2. Argo CD access issues:
-   - Wait for full initialization (1-2 minutes)
-   - Check container logs for password
-   - Verify network connectivity
-
-3. Resource optimization issues:
-   - Validate AWS credentials
-   - Check AMP workspace access
-   - Verify manifest directory mounting
-
 ## Best Practices
 
 1. Development:
@@ -165,6 +130,12 @@ This setup improves security by:
    - Start with ensemble strategy
    - Adjust thresholds based on application patterns
    - Monitor optimization results
+
+3. Use non-root user inside container when possible
+4. Keep base image updated
+5. Scan container images for vulnerabilities
+6. Use specific versions for dependencies
+7. Implement proper secret management
 
 ## Cleanup
 
@@ -189,14 +160,6 @@ This setup uses Docker socket mounting (`-v /var/run/docker.sock:/var/run/docker
 2. **Principle of Least Privilege**: Container only gets the permissions it needs
 3. **Better Security Practices**: Aligns with container security best practices
 4. **Maintained Functionality**: Preserves required container management capabilities
-
-### Best Practices
-
-1. Use non-root user inside container when possible
-2. Keep base image updated
-3. Scan container images for vulnerabilities
-4. Use specific versions for dependencies
-5. Implement proper secret management
 
 ## Troubleshooting
 

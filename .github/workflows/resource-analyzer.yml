@@ -69,7 +69,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Login to AWS ECR Public
         uses: aws-actions/configure-aws-credentials@v4
@@ -103,16 +103,6 @@ jobs:
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v ${{ github.workspace }}:/app/manifests \
             -v ${TEMP_BASE}:${TEMP_BASE} \
-            -v ~/.aws:/root/.aws \
-            -e AWS_REGION \
-            -e AWS_DEFAULT_REGION \
-            -e AWS_ACCESS_KEY_ID \
-            -e AWS_SECRET_ACCESS_KEY \
-            -e AWS_SESSION_TOKEN \
-            -e AWS_SECURITY_TOKEN \
-            -e AWS_ROLE_ARN \
-            -e AWS_WEB_IDENTITY_TOKEN_FILE \
-            -e AMP_WORKSPACE_ID=${{ secrets.AMP_WORKSPACE_ID }} \
             -e CLUSTER_NAME=${{ secrets.CLUSTER_NAME }} \
             -e BUSINESS_HOURS_START=${BUSINESS_HOURS_START} \
             -e BUSINESS_HOURS_END=${BUSINESS_HOURS_END} \
@@ -123,7 +113,7 @@ jobs:
             -e GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY_NAME} \
             -e GITHUB_USERNAME=${GITHUB_USERNAME} \
             -e TEMP_BASE=${TEMP_BASE} \
-            public.ecr.aws/y3y8k7w5/k8sresourceautoresizer:latest \
+             ghcr.io/k8sresourceautoresizer:latest \
             sh -c "/app/k8s-limits \
               --directory /app/manifests \
               --output ${TEMP_BASE}/TEMP/output.yaml \
