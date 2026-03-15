@@ -4,6 +4,7 @@
 [![ruff](https://img.shields.io/badge/lint-ruff-brightgreen?style=flat)](https://github.com/charliermarsh/ruff)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 [![commitizen](https://img.shields.io/badge/commitizen-enabled-blueviolet?style=flat)](https://commitizen-tools.github.io/commitizen/)
+[![Documentation](https://img.shields.io/badge/doc-latest-blue.svg)](https://thatmlopsguy.github.io/K8sResourceResizer/)
 
 A tool that optimizes Kubernetes resource limits and requests based on historical usage patterns.
 
