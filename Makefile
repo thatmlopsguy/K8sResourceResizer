@@ -46,7 +46,7 @@ apply-helm: ## Apply helm applications to cluster
 
 clean: ## Clean build artifacts and caches
 	@rm -rf dist build *.egg-info
-	@rm -rf .pytest_cache .mypy_cache .ruff_cache
+	@rm -rf .pytest_cache .mypy_cache .ruff_cache .coverage
 	@rm -rf tmp/
 	@rm -rf logs/*.log
 	@find . -type d -name "__pycache__" -exec rm -rf {} +
