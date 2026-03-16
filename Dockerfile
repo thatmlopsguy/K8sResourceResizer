@@ -2,7 +2,7 @@
 
 ARG TARGETPLATFORM=linux/amd64
 ARG PYTHON_VERSION=3.13-slim
-FROM --platform=$TARGETPLATFORM python:$PYTHON_VERSION AS builder
+FROM python:3.14 AS builder
 
 # Install uv from official image
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
@@ -15,18 +15,29 @@ ENV PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
+# Install curl for install.sh downloads
+# RUN apt-get update && \
+#     apt-get install -y --no-install-recommends \
+#     curl \
+#     ca-certificates \
+#     && rm -rf /var/lib/apt/lists/*
+
 # Install system dependencies
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        curl \
-        git \
-        pkg-config \
-        gcc \
-        g++ \
-        libopenblas-dev \
-        python3-dev \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update \
+#     && apt-get upgrade -y \
+#     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+#         curl \
+#         git \
+#         pkg-config \
+#         gcc \
+#         g++ \
+#         libopenblas-dev \
+#         python3-dev \
+#     && rm -rf /var/lib/apt/lists/*
+
+# Install kind, kubectl, and argocd
+COPY docker/install.sh /install.sh
+RUN chmod +x /install.sh && /install.sh
 
 WORKDIR /app
 
@@ -42,18 +53,8 @@ COPY src ./src/
 # Install the project itself
 RUN uv sync --frozen --no-dev
 
-# Create TEMP directory with proper permissions
-RUN mkdir -p /app/tmp && chmod 777 /app/tmp
-
-# Install kind, kubectl, and argocd
-COPY docker/install.sh /install.sh
-RUN chmod +x /install.sh && /install.sh
-
-# Update and upgrade all packages
-RUN apt-get update && apt-get upgrade -y
-
 # Final stage
-FROM --platform=$TARGETPLATFORM python:$PYTHON_VERSION
+FROM python:$PYTHON_VERSION
 
 ENV TZ=Etc/UTC \
     DEBIAN_FRONTEND=noninteractive \

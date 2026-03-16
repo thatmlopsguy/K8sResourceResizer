@@ -55,8 +55,11 @@ nodes:
     protocol: TCP
 EOF
 
-# Create the kind cluster with config
-kind create cluster --config /tmp/kind-config.yaml --wait 10m
+if kind get clusters 2>/dev/null | grep -q "^${CLUSTER_NAME}$"; then
+	echo "ℹ️  Cluster '${CLUSTER_NAME}' already exists, skipping creation."
+else
+  kind create cluster --config /tmp/kind-config.yaml --wait 10m
+fi
 
 # Verify nodes are ready
 echo "🔍 Checking cluster nodes..."

@@ -5,6 +5,9 @@
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 [![commitizen](https://img.shields.io/badge/commitizen-enabled-blueviolet?style=flat)](https://commitizen-tools.github.io/commitizen/)
 [![Documentation](https://img.shields.io/badge/doc-latest-blue.svg)](https://thatmlopsguy.github.io/K8sResourceResizer/)
+[![License](https://img.shields.io/github/license/thatmlopsguy/K8sResourceResizer)](LICENSE)
+[![GitHub Release](https://img.shields.io/github/v/release/thatmlopsguy/K8sResourceResizer)](https://github.com/thatmlopsguy/K8sResourceResizer/releases/latest)
+[![Kubernetes](https://img.shields.io/badge/kubernetes-%3E%3D%201.35-blue?logo=kubernetes&logoColor=white)](https://github.com/thatmlopsguy/K8sResourceResizer)
 
 A tool that optimizes Kubernetes resource limits and requests based on historical usage patterns.
 
