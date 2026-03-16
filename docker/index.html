@@ -1,0 +1,1099 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A tool that optimizes Kubernetes resource limits and requests based on historical usage patterns.">
+      
+      
+        <meta name="author" content="That MLOps Guy">
+      
+      
+        <link rel="canonical" href="https://thatmlopsguy.github.io/K8sResourceResizer/docker/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Docker - K8sResourceResizer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#docker-environment-for-k8s-resource-optimization" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="K8sResourceResizer" class="md-header__button md-logo" aria-label="K8sResourceResizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            K8sResourceResizer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Docker
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/thatmlopsguy/K8sResourceResizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    K8sResourceResizer
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="K8sResourceResizer" class="md-nav__button md-logo" aria-label="K8sResourceResizer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    K8sResourceResizer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/thatmlopsguy/K8sResourceResizer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    K8sResourceResizer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-the-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the Image
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the Container
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running the Container">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-development-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Development Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-optimization-mode-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resource Optimization Mode Locally
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters-explained" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters Explained
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accessing Services
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Accessing Services">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#argo-cd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Argo CD
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kubernetes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kubernetes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cleanup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-socket-mounting-vs-privileged-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Socket Mounting vs Privileged Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-the-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the Image
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the Container
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running the Container">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-development-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Development Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-optimization-mode-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resource Optimization Mode Locally
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters-explained" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters Explained
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accessing Services
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Accessing Services">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#argo-cd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Argo CD
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kubernetes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kubernetes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cleanup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-socket-mounting-vs-privileged-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Socket Mounting vs Privileged Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="docker-environment-for-k8s-resource-optimization">Docker Environment for K8s Resource Optimization</h1>
+<p>A Docker environment for running the Kubernetes Resource Optimizer with kind, kubectl, and Argo CD.
+The setup runs without privileged mode for security and CI/CD platform compatibility.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li>Non-privileged mode operation</li>
+<li>Pre-installed tools:</li>
+<li>kind</li>
+<li>kubectl</li>
+<li>Argo CD CLI</li>
+<li>Resource Optimization tools</li>
+<li>kind cluster setup</li>
+<li>Argo CD deployment</li>
+<li>Local development and resource optimization modes</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Docker installed on host machine</li>
+<li>Available ports:</li>
+<li>8080 (Argo CD UI)</li>
+<li>6550 (Kubernetes API)</li>
+</ul>
+<h2 id="building-the-image">Building the Image</h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># Build with no cache</span>
+docker<span class="w"> </span>build<span class="w"> </span>--no-cache<span class="w"> </span>-t<span class="w"> </span>k8sresourceautoresizer<span class="w"> </span>-f<span class="w"> </span>Dockerfile<span class="w"> </span>.
+
+<span class="c1"># Or regular build</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>k8sresourceautoresizer<span class="w"> </span>-f<span class="w"> </span>Dockerfile<span class="w"> </span>.
+</code></pre></div>
+<h2 id="running-the-container">Running the Container</h2>
+<h3 id="local-development-mode">Local Development Mode</h3>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--network<span class="o">=</span>host<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/var/run/docker.sock:/var/run/docker.sock<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/kube:/root/.kube<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/app<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">CLUSTER_NAME</span><span class="o">=</span>eks-blog-demo<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">RUN_LOCAL</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>k8sresourceautoresizer
+</code></pre></div>
+<h3 id="resource-optimization-mode-locally">Resource Optimization Mode Locally</h3>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--network<span class="o">=</span>host<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/var/run/docker.sock:/var/run/docker.sock<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/kube:/root/.kube<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/app<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">CLUSTER_NAME</span><span class="o">=</span>eks-blog-demo<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">GITHUB_REPOSITORY_NAME</span><span class="o">=</span>your-repo-name<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">GITHUB_USERNAME</span><span class="o">=</span>your-gh-username<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">GITHUB_TOKEN</span><span class="o">=</span>your-gh-token<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>k8sresourceautoresizer<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;/app/k8s-limits \</span>
+<span class="s2">    --directory /app/manifests \</span>
+<span class="s2">    --strategy ensemble \</span>
+<span class="s2">    --history-window 24h \</span>
+<span class="s2">    --cpu-percentile 95.0 \</span>
+<span class="s2">    --memory-buffer 1.15 \</span>
+<span class="s2">    --debug&quot;</span>
+</code></pre></div>
+<h3 id="parameters-explained">Parameters Explained</h3>
+<ul>
+<li><code>--network=host</code>: Provides host networking for better compatibility</li>
+<li><code>-v /var/run/docker.sock:/var/run/docker.sock</code>: Enables Docker-in-Docker without privileged mode</li>
+<li><code>-p 8080:8080</code>: Argo CD web UI access</li>
+<li><code>-p 6550:6550</code>: Kubernetes API server access</li>
+<li><code>-v $(pwd)/kube:/root/.kube</code>: Persists kubeconfig</li>
+<li><code>-v $(pwd):/app</code>: Mounts application directory</li>
+</ul>
+<h2 id="environment-variables">Environment Variables</h2>
+<h3 id="required">Required</h3>
+<ul>
+<li><code>CLUSTER_NAME</code>: Name for the kind cluster</li>
+<li><code>GITHUB_REPOSITORY_NAME</code>: Name of the GitHub Repository</li>
+<li><code>GITHUB_USERNAME</code>: GitHub user name</li>
+<li><code>GITHUB_TOKEN</code>: GitHub token for authentication</li>
+</ul>
+<h3 id="optional">Optional</h3>
+<ul>
+<li><code>RUN_LOCAL</code>: Set to "true" for development mode</li>
+<li><code>BUSINESS_HOURS_START</code>: Start of business hours (default: 9)</li>
+<li><code>BUSINESS_HOURS_END</code>: End of business hours (default: 17)</li>
+<li><code>BUSINESS_DAYS</code>: Business days (default: 0,1,2,3,4 where 0=Monday)</li>
+<li><code>TREND_THRESHOLD</code>: Threshold for trend detection</li>
+<li><code>HIGH_VARIANCE_THRESHOLD</code>: Threshold for high variance detection</li>
+</ul>
+<h2 id="accessing-services">Accessing Services</h2>
+<h3 id="argo-cd">Argo CD</h3>
+<ul>
+<li>URL: <code>https://localhost:8080</code></li>
+<li>Default credentials will be shown in container logs</li>
+<li>Login using:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>argocd<span class="w"> </span>login<span class="w"> </span>localhost:8080<span class="w"> </span>--username<span class="w"> </span>admin<span class="w"> </span>--password<span class="w"> </span>&lt;password-from-logs&gt;<span class="w"> </span>--insecure
+</code></pre></div>
+<h3 id="kubernetes">Kubernetes</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Configure kubectl</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/kube/config
+
+<span class="c1"># Verify connection</span>
+kubectl<span class="w"> </span>cluster-info
+</code></pre></div>
+<h2 id="best-practices">Best Practices</h2>
+<ol>
+<li>Development:</li>
+<li>Use <code>RUN_LOCAL=true</code> for persistent environment</li>
+<li>Mount source code for live development</li>
+<li>
+<p>Keep kubeconfig persistent with volume mount</p>
+</li>
+<li>
+<p>Resource Optimization:</p>
+</li>
+<li>Use specific time windows for analysis</li>
+<li>Start with ensemble strategy</li>
+<li>Adjust thresholds based on application patterns</li>
+<li>
+<p>Monitor optimization results</p>
+</li>
+<li>
+<p>Use non-root user inside container when possible</p>
+</li>
+<li>Keep base image updated</li>
+<li>Scan container images for vulnerabilities</li>
+<li>Use specific versions for dependencies</li>
+<li>Implement proper secret management</li>
+</ol>
+<h2 id="cleanup">Cleanup</h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># Stop container</span>
+docker<span class="w"> </span>stop<span class="w"> </span><span class="k">$(</span>docker<span class="w"> </span>ps<span class="w"> </span>-q<span class="w"> </span>--filter<span class="w"> </span><span class="nv">ancestor</span><span class="o">=</span>k8sresourceautoresizer<span class="k">)</span>
+
+<span class="c1"># Remove container</span>
+docker<span class="w"> </span>rm<span class="w"> </span><span class="k">$(</span>docker<span class="w"> </span>ps<span class="w"> </span>-aq<span class="w"> </span>--filter<span class="w"> </span><span class="nv">ancestor</span><span class="o">=</span>k8sresourceautoresizer<span class="k">)</span>
+
+<span class="c1"># Remove image (optional)</span>
+docker<span class="w"> </span>rmi<span class="w"> </span>k8sresourceautoresizer
+</code></pre></div>
+<h2 id="security-considerations">Security Considerations</h2>
+<h3 id="docker-socket-mounting-vs-privileged-mode">Docker Socket Mounting vs Privileged Mode</h3>
+<p>This setup uses Docker socket mounting (<code>-v /var/run/docker.sock:/var/run/docker.sock</code>) instead of privileged mode (<code>--privileged</code>) for enhanced security:</p>
+<ol>
+<li><strong>Reduced Attack Surface</strong>: Only exposes Docker API functionality instead of full host access</li>
+<li><strong>Principle of Least Privilege</strong>: Container only gets the permissions it needs</li>
+<li><strong>Better Security Practices</strong>: Aligns with container security best practices</li>
+<li><strong>Maintained Functionality</strong>: Preserves required container management capabilities</li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ol>
+<li><strong>Docker Socket Permission Issues</strong>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># Add current user to docker group</span>
+sudo<span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>docker<span class="w"> </span><span class="nv">$USER</span>
+<span class="c1"># Restart Docker service</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
+</code></pre></div>
+<ol>
+<li><strong>Network Access Issues</strong>:</li>
+<li>Ensure host network mode is enabled</li>
+<li>Check firewall rules for required ports</li>
+<li>
+<p>Verify AWS credentials have necessary permissions</p>
+</li>
+<li>
+<p><strong>Volume Mount Issues</strong>:</p>
+</li>
+<li>Ensure paths exist on host</li>
+<li>Check file permissions</li>
+<li>Use absolute paths when needed</li>
+</ol>
+<p>For more detailed troubleshooting, check the logs with:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>&lt;container_id&gt;
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 That MLOps Guy
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/thatmlopsguy/" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://thatmlopsguy.github.io/" target="_blank" rel="noopener" title="thatmlopsguy.github.io" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
